@@ -14,6 +14,7 @@ import java.util.List;
 public class Mobb {
 
     private Mob mAttack;
+    private static final Random RANDOM = new Random(); // Sử dụng static Random
 
     public long lastTimeChanM;
 
@@ -31,7 +32,7 @@ public class Mobb {
     public void GetMobAttack() {
         if (this.bot.zone.mobs.size() >= 1) {
             if (this.mAttack == null || this.mAttack.isDie()) {
-                mAttack = this.bot.zone.mobs.get(new Random().nextInt(this.bot.zone.mobs.size()));
+                mAttack = this.bot.zone.mobs.get(RANDOM.nextInt(this.bot.zone.mobs.size()));
             }
         }
     }
@@ -52,7 +53,7 @@ public class Mobb {
     }
 
     public void chanGeMap() {
-        if (this.lastTimeChanM < ((System.currentTimeMillis() - 150000) - new Random().nextInt(150000))) {
+        if (this.lastTimeChanM < ((System.currentTimeMillis() - 150000) - RANDOM.nextInt(150000))) {
             this.bot.joinMap();
         }
     }

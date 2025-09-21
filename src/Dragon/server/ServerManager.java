@@ -412,8 +412,7 @@ public class ServerManager {
     }
 
     private void activeGame() {
-        final long delay = 10000; // Increased from 2s to 10s to reduce database load
-
+        final long delay = 10000;
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
@@ -431,10 +430,10 @@ public class ServerManager {
                             Logger.logException(ServerManager.class, e, "Failed to save clan data");
                         }
                     });
-                    
+
                     // AutoSavePlayerData is already async now
                     Service.gI().AutoSavePlayerData();
-                    
+
                     java.util.concurrent.CompletableFuture.runAsync(() -> {
                         try {
                             ShopKyGuiManager.gI().save();

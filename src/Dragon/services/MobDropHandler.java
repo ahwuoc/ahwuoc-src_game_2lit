@@ -19,28 +19,17 @@ import java.util.List;
 public class MobDropHandler {
 
     public static List<ItemMap> getItemMobReward(Mob mob, Player player, int x, int yEnd) {
-        Dragon.utils.Logger.log("MobDropHandler: Starting getItemMobReward for mob ID: " + mob.tempId
-                + ", player: " + player.name + ", map: " + player.zone.map.mapId);
 
         List<ItemMap> list = new ArrayList<>();
         MobReward mobReward = Manager.MOB_REWARDS.get(mob.tempId);
         if (mobReward == null) {
-            Dragon.utils.Logger.log("MobDropHandler: No mob reward config found for mob ID: " + mob.tempId);
             return list;
         }
 
-        Dragon.utils.Logger.log("MobDropHandler: Found mob reward config for mob ID: " + mob.tempId);
-
         if (MapStart(player.zone.map.mapId)) {
-            Dragon.utils.Logger.log("MobDropHandler: Map is in start state, returning empty list");
             return new ArrayList<>();
         }
-
-        // List<ItemMobReward> items = mobReward.getItemReward();
-        // List<ItemMobReward> golds = mobReward.getGoldReward();
         handleSqlDrops(mob, player, x, yEnd, list);
-        Dragon.utils.Logger.log("MobDropHandler: Final result - Total items to drop: " + list.size()
-                + " for mob ID: " + mob.tempId + ", player: " + player.name);
         return list;
     }
 
@@ -69,13 +58,13 @@ public class MobDropHandler {
     private static void handleCrystalStarDrops(Mob mob, Player player, int x, int yEnd, List<ItemMap> list) {
         // Danh sách thông tin các sao pha lê: {itemId, optionId, optionLevel}
         int[][] saoPhaLeInfo = {
-            {441, 95, 5}, // Sao Pha Lê Đỏ
-            {442, 96, 5}, // Sao Pha Lê Xanh Dương
-            {443, 97, 5}, // Sao Pha Lê Hồng
-            {444, 98, 5}, // Sao Pha Lê Tím
-            {445, 99, 5}, // Sao Pha Lê Cam
-            {446, 10, 5}, // Sao Pha Lê Vàng
-            {447, 101, 5} // Sao Pha Lê Xanh Lá Cây
+                { 441, 95, 5 }, // Sao Pha Lê Đỏ
+                { 442, 96, 5 }, // Sao Pha Lê Xanh Dương
+                { 443, 97, 5 }, // Sao Pha Lê Hồng
+                { 444, 98, 5 }, // Sao Pha Lê Tím
+                { 445, 99, 5 }, // Sao Pha Lê Cam
+                { 446, 10, 5 }, // Sao Pha Lê Vàng
+                { 447, 101, 5 } // Sao Pha Lê Xanh Lá Cây
         };
 
         if (mob.zone.map.mapId >= 3 && mob.zone.map.mapId <= 99) {
@@ -114,49 +103,49 @@ public class MobDropHandler {
     @SuppressWarnings("unused")
     private static void handleEquipmentDrops(Mob mob, Player player, int x, int yEnd, List<ItemMap> list) {
         if (mob.zone != null && mob.zone.map != null) {
-            int[][] itemIds = new int[][]{
-                // Trái đất
-                {0, 6, 21, 27, 12}, // level 1
-                {33, 35, 24, 30, 57}, // level 2
-                {3, 9, 37, 39, 58}, // level 3
-                {34, 36, 38, 40, 59}, // level 4
-                {136, 140, 144, 148, 184}, // level 5
-                {137, 141, 145, 149, 185}, // level 6
-                {138, 142, 146, 150, 186}, // level 7
-                {139, 143, 147, 151, 187}, // level 8
-                {230, 242, 254, 266, 278}, // level 9
-                {231, 243, 255, 267, 279}, // level 10
-                {232, 244, 256, 268, 280}, // level 11
-                {233, 245, 257, 269, 281}, // level 12
-                // Namec
-                {1, 7, 22, 28, 12}, // level 1
-                {41, 43, 46, 47, 57}, // level 2
-                {4, 10, 25, 31, 58}, // level 3
-                {42, 44, 45, 48, 59}, // level 4
-                {152, 156, 160, 164, 184}, // level 5
-                {153, 157, 161, 165, 185}, // level 6
-                {154, 158, 162, 166, 186}, // level 7
-                {155, 159, 163, 167, 187}, // level 8
-                {234, 246, 258, 270, 278}, // level 9
-                {235, 247, 259, 271, 279}, // level 10
-                {236, 248, 260, 272, 280}, // level 11
-                {237, 249, 261, 273, 281}, // level 12
-                // Xayda
-                {2, 8, 23, 29, 12}, // level 1
-                {49, 51, 53, 55, 57}, // level 2
-                {5, 11, 26, 32, 58}, // level 3
-                {50, 52, 54, 56, 59}, // level 4
-                {168, 172, 176, 180, 184}, // level 5
-                {169, 173, 177, 181, 185}, // level 6
-                {170, 174, 178, 182, 186}, // level 7
-                {171, 175, 179, 183, 187}, // level 8
-                {238, 250, 262, 274, 278}, // level 9
-                {239, 251, 263, 275, 279}, // level 10
-                {240, 252, 264, 276, 280}, // level 11
-                {241, 253, 265, 277, 281},
-                // thần linh và hủy diệt
-                {555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567},
-                {650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662}// level 12
+            int[][] itemIds = new int[][] {
+                    // Trái đất
+                    { 0, 6, 21, 27, 12 }, // level 1
+                    { 33, 35, 24, 30, 57 }, // level 2
+                    { 3, 9, 37, 39, 58 }, // level 3
+                    { 34, 36, 38, 40, 59 }, // level 4
+                    { 136, 140, 144, 148, 184 }, // level 5
+                    { 137, 141, 145, 149, 185 }, // level 6
+                    { 138, 142, 146, 150, 186 }, // level 7
+                    { 139, 143, 147, 151, 187 }, // level 8
+                    { 230, 242, 254, 266, 278 }, // level 9
+                    { 231, 243, 255, 267, 279 }, // level 10
+                    { 232, 244, 256, 268, 280 }, // level 11
+                    { 233, 245, 257, 269, 281 }, // level 12
+                    // Namec
+                    { 1, 7, 22, 28, 12 }, // level 1
+                    { 41, 43, 46, 47, 57 }, // level 2
+                    { 4, 10, 25, 31, 58 }, // level 3
+                    { 42, 44, 45, 48, 59 }, // level 4
+                    { 152, 156, 160, 164, 184 }, // level 5
+                    { 153, 157, 161, 165, 185 }, // level 6
+                    { 154, 158, 162, 166, 186 }, // level 7
+                    { 155, 159, 163, 167, 187 }, // level 8
+                    { 234, 246, 258, 270, 278 }, // level 9
+                    { 235, 247, 259, 271, 279 }, // level 10
+                    { 236, 248, 260, 272, 280 }, // level 11
+                    { 237, 249, 261, 273, 281 }, // level 12
+                    // Xayda
+                    { 2, 8, 23, 29, 12 }, // level 1
+                    { 49, 51, 53, 55, 57 }, // level 2
+                    { 5, 11, 26, 32, 58 }, // level 3
+                    { 50, 52, 54, 56, 59 }, // level 4
+                    { 168, 172, 176, 180, 184 }, // level 5
+                    { 169, 173, 177, 181, 185 }, // level 6
+                    { 170, 174, 178, 182, 186 }, // level 7
+                    { 171, 175, 179, 183, 187 }, // level 8
+                    { 238, 250, 262, 274, 278 }, // level 9
+                    { 239, 251, 263, 275, 279 }, // level 10
+                    { 240, 252, 264, 276, 280 }, // level 11
+                    { 241, 253, 265, 277, 281 },
+                    // thần linh và hủy diệt
+                    { 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567 },
+                    { 650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662 }// level 12
             };
 
             if (Util.isTrue(2, 100)) {
@@ -250,12 +239,8 @@ public class MobDropHandler {
      */
     private static void handleSqlDrops(Mob mob, Player player, int x, int yEnd, List<ItemMap> list) {
         try {
-            Dragon.utils.Logger
-                    .log("MobDropHandler: Starting SQL drops for mob ID: " + mob.tempId + ", player: " + player.name);
             List<ItemMap> sqlDrops = MobRewardService.getInstance().processRewards(mob, player, x, yEnd);
-            Dragon.utils.Logger.log("MobDropHandler: SQL drops returned " + sqlDrops.size() + " items");
             list.addAll(sqlDrops);
-            Dragon.utils.Logger.log("MobDropHandler: Total items after SQL drops: " + list.size());
         } catch (Exception e) {
             // Log error but don't break the drop system
             Dragon.utils.Logger.logException(MobDropHandler.class, e);

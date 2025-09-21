@@ -20,6 +20,8 @@ import java.util.Random;
 
 public class Bot extends Player {
 
+    private static final Random RANDOM = new Random(); // Static Random để tránh tạo mới liên tục
+
     private short head_;
     private short body_;
     private short leg_;
@@ -41,18 +43,17 @@ public class Bot extends Player {
         this.leg_ = leg;
         this.shop = shop;
         this.name = name;
-        this.id = new Random().nextInt(2000000000);
+        this.id = RANDOM.nextInt(2000000000);
         this.type = type;
         this.isBot = true;
     }
 
     public int MapToPow() {
-        Random random = new Random();
         int mapId = 21;
         if (this.nPoint.power < 2000000000) {
             if (this.gender == 0 || this.gender == 1 || this.gender == 2) {
                 // Chỉ gán mapId là 2 hoặc 3 khi thỏa điều kiện
-                mapId = (random.nextBoolean()) ? 2 : 3;
+                mapId = (RANDOM.nextBoolean()) ? 2 : 3;
             }
         }
         return mapId;
@@ -80,8 +81,9 @@ public class Bot extends Player {
                             return randomZone.isFullPlayer() ? null : randomZone;
                         });
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
+        
         if (zone != null) {
             this.index_ = 0;
             return zone;
@@ -92,9 +94,27 @@ public class Bot extends Player {
                 ChangeMapService.gI().exitMap(this);
                 return null;
             } else {
-                return getRandomZone(MapToPow());
+                // Tránh đệ quy vô hạn bằng cách thử map khác
+                int[] alternativeMaps = {21, 1, 2, 3};
+                for (int altMapId : alternativeMaps) {
+                    if (altMapId != mapId) {
+                        Zone altZone = getRandomZoneNonRecursive(altMapId);
+                        if (altZone != null) {
+                            return altZone;
+                        }
+                    }
+                }
+                return null;
             }
         }
+    }
+    
+    private Zone getRandomZoneNonRecursive(int mapId) {
+        Map map = MapService.gI().getMapById(mapId);
+        if (map != null && !map.zones.isEmpty()) {
+            return map.zones.get(RANDOM.nextInt(map.zones.size()));
+        }
+        return null;
     }
 
     @Override
