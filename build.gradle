@@ -21,6 +21,8 @@ repositories {
     flatDir {
         dirs 'lib'
     }
+    // Maven Central for external dependencies
+    mavenCentral()
 }
 
 dependencies {
@@ -32,6 +34,8 @@ dependencies {
     implementation files('lib/okio-1.6.0.jar')
     implementation files('lib/rxjava-3.1.6.jar')
     
+    // OSHI library for system monitoring
+    implementation 'com.github.oshi:oshi-core:6.4.6'
 }
 
 sourceSets {

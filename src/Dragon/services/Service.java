@@ -1343,37 +1343,8 @@ public class Service {
             }
 
             if (text.equals("ad")) {
-                // Get accurate system metrics
-                com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
-                        .getOperatingSystemMXBean();
-                
-                // Memory calculations with proper error handling
-                long totalMemory = osBean.getTotalPhysicalMemorySize();
-                long freeMemory = osBean.getFreePhysicalMemorySize();
-                long usedMemory = totalMemory - freeMemory;
-                
-                DecimalFormat df = new DecimalFormat("0.00");
-                
-                // CPU usage with proper validation
-                double cpuLoad = osBean.getSystemCpuLoad();
-                String cpuUsage = cpuLoad >= 0 ? df.format(cpuLoad * 100) : "N/A";
-                
-                // Memory in GB with actual total memory
-                String usedMemoryStr = df.format((double) usedMemory / (1024 * 1024 * 1024));
-                String totalMemoryStr = df.format((double) totalMemory / (1024 * 1024 * 1024));
-                
-                // Thread count - use actual active threads
-                int activeThreads = Thread.activeCount();
-                int sessionCount = GirlkunSessionManager.gI().getSessions().size();
-                
-                NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587,
-                        "|4|Người đang chơi: " + Client.gI().getPlayers().size() + "\n" 
-                        + "|8|Active threads: " + activeThreads + " | Sessions: " + sessionCount + "\n"
-                        + "|7|CPU: " + cpuUsage + "% | RAM: " + usedMemoryStr + "/" + totalMemoryStr + "GB\n"
-                        + "|7|Server uptime: " + ServerManager.timeStart,
-                        "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
+                AdminPanelService.gI().showAdminPanel(player);
                 return;
-
             }
             if (text.equals("bot")) {
                 NpcService.gI().createMenuConMeo(player, 206783, 206783, "|7| Menu bot\n"
@@ -1613,12 +1584,12 @@ public class Service {
                 // Batch save với throttling
                 for (Player player : players) {
                     if (player != null) {
-                        Long lastSave = lastPlayerSave.get((int)player.id);
+                        Long lastSave = lastPlayerSave.get((int) player.id);
                         // Chỉ save nếu đã qua cooldown
                         if (lastSave == null || (currentTime - lastSave) >= PLAYER_SAVE_COOLDOWN) {
                             try {
                                 PlayerDAO.updatePlayer(player);
-                                lastPlayerSave.put((int)player.id, currentTime);
+                                lastPlayerSave.put((int) player.id, currentTime);
                             } catch (Exception e) {
                                 Logger.logException(Service.class, e, "Failed to save player: " + player.name);
                             }
