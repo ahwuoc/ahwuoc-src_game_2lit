@@ -1343,7 +1343,11 @@ public class Service {
             }
 
             if (text.equals("ad")) {
+                System.out.println("=== Admin command 'ad' received ===");
+                System.out.println("Player: " + (player != null ? player.name : "null"));
+                System.out.println("Calling AdminPanelService...");
                 AdminPanelService.gI().showAdminPanel(player);
+                System.out.println("AdminPanelService call completed");
                 return;
             }
             if (text.equals("bot")) {
