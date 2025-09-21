@@ -1,0 +1,105 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'nrotuonglai'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    // Ensure builds use JDK 17 regardless of the JDK used to run Gradle
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+
+repositories {
+    // Local libs
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+dependencies {
+    implementation files('lib/GirlkunNetwork.jar')
+    implementation files('lib/apache-commons-lang.jar')
+    implementation files('lib/girlkundb-1.0.0.jar')
+    implementation files('lib/json_simple-1.1.jar')
+    implementation files('lib/okhttp-3.0.0.jar')
+    implementation files('lib/okio-1.6.0.jar')
+    implementation files('lib/rxjava-3.1.6.jar')
+    
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    // Use --release 17 instead of only source/target for consistent standard library targeting
+    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+        options.release = 17
+    }
+}
+
+// Ensure all tasks use UTF-8 encoding
+tasks.withType(JavaExec).configureEach {
+    systemProperty 'file.encoding', 'UTF-8'
+    systemProperty 'sun.jnu.encoding', 'UTF-8'
+    systemProperty 'console.encoding', 'UTF-8'
+}
+
+// Configure application plugin to use UTF-8
+application {
+    mainClass = 'Dragon.server.ServerManager'
+    applicationDefaultJvmArgs = [
+        '-Dfile.encoding=UTF-8',
+        '-Dsun.jnu.encoding=UTF-8',
+        '-Dconsole.encoding=UTF-8',
+        '-Djava.awt.headless=true'
+    ]
+}
+
+// Create a fat jar to run without Gradle
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.filter { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+}
+
+// Provide an application distribution (bin scripts + libs)
+distributions {
+    main {
+        contents {
+            // Include game data folder in the distro
+            from('data') { into 'data' }
+            // Do NOT copy local lib/ here to avoid duplicating jars that Gradle already
+            // puts into the distribution's lib directory from runtimeClasspath
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
+
+// Fast incremental build task for development (no clean, no tests)
+tasks.register('dev') {
+    group = 'build'
+    description = 'Fast incremental compile for development (skips clean/tests).'
+    dependsOn 'classes'
+}
+
+// Make 'dev' the default when running without explicit task
+defaultTasks 'dev'
