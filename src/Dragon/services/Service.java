@@ -1347,10 +1347,7 @@ public class Service {
                 return;
             }
             if (text.equals("bot")) {
-                NpcService.gI().createMenuConMeo(player, 206783, 206783, "|7| Menu bot\n"
-                        + "Player Online : " + Client.gI().getPlayers().size() + "\n"
-                        + "Bot Online : " + BotManager.gI().bot.size(),
-                        "Bot\nPem Qu�i", "Bot\nB�n Item", "Bot\nS?n Boss", "??�ng");
+                BotManagementService.gI().showBotManagementPanel(player);
                 return;
             }
             if (text.equals("dtu")) {
