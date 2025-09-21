@@ -50,7 +50,7 @@ public class AdminPanelService {
             System.out.println("Calling NpcService.createMenuConMeo...");
 
             NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587, adminMenu,
-                    "Tắt\nServer", "Restart\nServer", "Backup\nData", "Đóng");
+                    "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
 
             System.out.println("Admin panel created successfully!");
 

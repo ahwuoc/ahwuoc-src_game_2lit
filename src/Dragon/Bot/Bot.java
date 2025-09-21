@@ -49,14 +49,81 @@ public class Bot extends Player {
     }
 
     public int MapToPow() {
+        // Tìm map có nhiều quái nhất dựa trên sức mạnh
+        int bestMapId = findBestMapWithMobs();
+        if (bestMapId != -1) {
+            return bestMapId;
+        }
+        
+        // Fallback về logic cũ nếu không tìm được map phù hợp
         int mapId = 21;
         if (this.nPoint.power < 2000000000) {
             if (this.gender == 0 || this.gender == 1 || this.gender == 2) {
-                // Chỉ gán mapId là 2 hoặc 3 khi thỏa điều kiện
                 mapId = (RANDOM.nextBoolean()) ? 2 : 3;
             }
         }
         return mapId;
+    }
+    
+    /**
+     * Tìm map tốt nhất có nhiều quái để bot có thể săn lùng
+     * @return mapId của map có nhiều quái nhất, -1 nếu không tìm thấy
+     */
+    private int findBestMapWithMobs() {
+        int[] huntingMaps;
+        
+        // Chọn danh sách map dựa trên sức mạnh
+        if (this.nPoint.power < 500000) {
+            huntingMaps = TraiDat; // Map Trái Đất cho newbie
+        } else if (this.nPoint.power < 50000000) {
+            huntingMaps = Namec; // Map Namec cho mid-level
+        } else {
+            huntingMaps = XayDa; // Map Xayda cho high-level
+        }
+        
+        int bestMapId = -1;
+        int maxMobCount = 0;
+        
+        // Tìm map có nhiều quái sống nhất
+        for (int mapId : huntingMaps) {
+            int mobCount = countAliveMobsInMap(mapId);
+            if (mobCount > maxMobCount) {
+                maxMobCount = mobCount;
+                bestMapId = mapId;
+            }
+        }
+        
+        // Chỉ chọn map nếu có ít nhất 3 con quái
+        return maxMobCount >= 3 ? bestMapId : -1;
+    }
+    
+    /**
+     * Đếm số lượng quái còn sống trong map
+     * @param mapId ID của map cần kiểm tra
+     * @return số lượng quái còn sống
+     */
+    private int countAliveMobsInMap(int mapId) {
+        try {
+            Map map = MapService.gI().getMapById(mapId);
+            if (map == null || map.zones.isEmpty()) {
+                return 0;
+            }
+            
+            int totalAliveMobs = 0;
+            for (Zone zone : map.zones) {
+                if (zone.mobs != null) {
+                    for (Dragon.models.mob.Mob mob : zone.mobs) {
+                        // Kiểm tra quái còn sống (status != 0 là chết)
+                        if (mob.point.hp > 0 && mob.status != 0) {
+                            totalAliveMobs++;
+                        }
+                    }
+                }
+            }
+            return totalAliveMobs;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public void joinMap() {
@@ -65,6 +132,47 @@ public class Bot extends Player {
             ChangeMapService.gI().goToMap(this, zone);
             this.zone.load_Me_To_Another(this);
             this.mo1.lastTimeChanM = System.currentTimeMillis();
+        }
+    }
+    
+    /**
+     * Kiểm tra xem bot có nên chuyển map không (khi quái chết hết)
+     * @return true nếu nên chuyển map
+     */
+    public boolean shouldChangeMap() {
+        if (this.zone == null) {
+            return true;
+        }
+        
+        // Kiểm tra số quái còn sống trong zone hiện tại
+        int aliveMobsInCurrentZone = 0;
+        if (this.zone.mobs != null) {
+            for (Dragon.models.mob.Mob mob : this.zone.mobs) {
+                if (mob.point.hp > 0 && mob.status != 0) {
+                    aliveMobsInCurrentZone++;
+                }
+            }
+        }
+        
+        // Chuyển map nếu ít hơn 2 con quái còn sống
+        return aliveMobsInCurrentZone < 2;
+    }
+    
+    /**
+     * Tự động chuyển map khi cần thiết
+     */
+    public void autoChangeMapIfNeeded() {
+        if (shouldChangeMap()) {
+            // Tìm map mới có nhiều quái
+            int newMapId = MapToPow();
+            if (newMapId != this.zone.map.mapId) {
+                Zone newZone = getRandomZone(newMapId);
+                if (newZone != null) {
+                    ChangeMapService.gI().goToMap(this, newZone);
+                    this.zone.load_Me_To_Another(this);
+                    this.mo1.lastTimeChanM = System.currentTimeMillis();
+                }
+            }
         }
     }
 
@@ -148,6 +256,12 @@ public class Bot extends Player {
     public void update() {
         super.update();
         this.increasePoint();
+        
+        // Tự động chuyển map nếu cần (chỉ cho bot quái - type 0)
+        if (this.type == 0) {
+            autoChangeMapIfNeeded();
+        }
+        
         switch (this.type) {
             case 0:
                 this.mo1.update();
