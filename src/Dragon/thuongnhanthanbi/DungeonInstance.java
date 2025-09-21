@@ -9,6 +9,10 @@ import com.girlkun.network.io.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import Dragon.utils.Logger;
 
 public class DungeonInstance {
 
@@ -143,20 +147,27 @@ public class DungeonInstance {
     private void startWaveCountdown() {
         Service.gI().sendThongBao(owner,
                 "Chuẩn bị cho Wave " + currentWave + "! Bắt đầu trong " + COUNTDOWN_SECONDS + " giây...");
-        new Thread(() -> {
+        
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        final int[] timeWait = {COUNTDOWN_SECONDS};
+        
+        scheduler.scheduleAtFixedRate(() -> {
             try {
-                for (int i = COUNTDOWN_SECONDS; i > 0; i--) {
-                    Service.gI().sendThongBao(owner, "Wave " + currentWave + " bắt đầu trong: " + i + " giây");
-                    Thread.sleep(COUNTDOWN_INTERVAL);
+                if (timeWait[0] > 0) {
+                    Service.gI().sendThongBao(owner, "Wave " + currentWave + " bắt đầu trong: " + timeWait[0] + " giây");
+                    timeWait[0]--;
+                } else {
+                    scheduler.shutdown();
+                    if (isActive) {
+                        requiredKillsThisWave = BASE_KILLS_REQUIRED + (currentWave - 1) * KILLS_INCREASE_PER_WAVE;
+                        executeWaveStart();
+                    }
                 }
-                if (isActive) {
-                    requiredKillsThisWave = BASE_KILLS_REQUIRED + (currentWave - 1) * KILLS_INCREASE_PER_WAVE;
-                    executeWaveStart();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                Logger.logException(DungeonInstance.class, e, "Error in wave countdown for player: " + (owner != null ? owner.name : "null"));
+                scheduler.shutdown();
             }
-        }).start();
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void executeWaveStart() {
@@ -291,19 +302,25 @@ public class DungeonInstance {
                 + requiredKillsThisWave + " quái vật. Wave tiếp theo sẽ bắt đầu sau 5 giây...");
         totalKillsThisWave = 0;
 
-        new Thread(() -> {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        final int[] timeWait = {COUNTDOWN_SECONDS};
+        
+        scheduler.scheduleAtFixedRate(() -> {
             try {
-                for (int i = COUNTDOWN_SECONDS; i > 0; i--) {
-                    Service.gI().sendThongBao(owner, "Wave tiếp theo bắt đầu trong: " + i + " giây");
-                    Thread.sleep(COUNTDOWN_INTERVAL);
+                if (timeWait[0] > 0) {
+                    Service.gI().sendThongBao(owner, "Wave tiếp theo bắt đầu trong: " + timeWait[0] + " giây");
+                    timeWait[0]--;
+                } else {
+                    scheduler.shutdown();
+                    if (isActive && owner != null && owner.zone != null) {
+                        startNextWave();
+                    }
                 }
-                if (isActive && owner != null && owner.zone != null) {
-                    startNextWave();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                Logger.logException(DungeonInstance.class, e, "Error in next wave countdown for player: " + (owner != null ? owner.name : "null"));
+                scheduler.shutdown();
             }
-        }).start();
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void startNextWave() {
@@ -365,9 +382,10 @@ public class DungeonInstance {
                 owner.zone.mobs.removeIf(mob -> mob.name != null && mob.name.contains("Wave"));
             }
 
-            new Thread(() -> {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            
+            scheduler.schedule(() -> {
                 try {
-                    Thread.sleep(KICK_DELAY_SECONDS * 1000);
                     if (owner != null) {
                         Dragon.thuongnhanthanbi.Dungeon_Manager.gI().removePlayerCompletely(owner);
 
@@ -376,10 +394,11 @@ public class DungeonInstance {
 
                         Service.gI().sendThongBao(owner, "Bạn đã bị đưa ra khỏi dungeon do thất bại!");
                     }
+                    scheduler.shutdown();
                 } catch (Exception e) {
-                    System.out.println("Error kicking player from dungeon: " + e.getMessage());
+                    Logger.logException(DungeonInstance.class, e, "Error kicking player from dungeon");
                 }
-            }).start();
+            }, KICK_DELAY_SECONDS, TimeUnit.SECONDS);
         } catch (Exception e) {
             System.out.println("Error in kickPlayerFromDungeon: " + e.getMessage());
         }

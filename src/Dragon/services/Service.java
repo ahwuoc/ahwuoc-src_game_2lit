@@ -16,6 +16,7 @@ import Dragon.models.boss.list_boss.doanh_trai.TrungUyTrang;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.util.ArrayList;
 import java.util.List;
@@ -1342,23 +1343,38 @@ public class Service {
                 Service.gI().sendThongBaoAllPlayer(a);
             }
 
-            com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
-                    .getOperatingSystemMXBean();
-            long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-            long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
-            long usedPhysicalMemory = totalPhysicalMemorySize - freePhysicalMemorySize;
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
-            String cpuUsage = decimalFormat.format(operatingSystemMXBean.getSystemCpuLoad() * 100);
-            String usedPhysicalMemoryStr = decimalFormat.format((double) usedPhysicalMemory / (1024 * 1024 * 1024));
-
             if (text.equals("ad")) {
+                // Get accurate system metrics using modern approach
+                com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
+                        .getOperatingSystemMXBean();
+                
+                // Use Runtime for memory info instead of deprecated methods
+                Runtime runtime = Runtime.getRuntime();
+                
+                long totalMemory = runtime.maxMemory();
+                long freeMemory = runtime.freeMemory();
+                long usedMemory = runtime.totalMemory() - freeMemory;
+
+                DecimalFormat df = new DecimalFormat("0.00");
+
+                // CPU usage with proper validation - using process CPU load instead of deprecated system CPU load
+                double cpuLoad = osBean.getProcessCpuLoad();
+                String cpuUsage = cpuLoad >= 0 ? df.format(cpuLoad * 100) : "N/A";
+
+                // Memory in GB - JVM memory usage instead of system memory
+                String usedMemoryStr = df.format((double) usedMemory / (1024 * 1024 * 1024));
+                String totalMemoryStr = df.format((double) totalMemory / (1024 * 1024 * 1024));
+
+                // Thread count - use actual active threads
+                int activeThreads = Thread.activeCount();
+                int sessionCount = GirlkunSessionManager.gI().getSessions().size();
+
                 NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587,
-                        "|4| Ng???i ??ang Ch?i: " + Client.gI().getPlayers().size() + "\n" + "|8|Current thread: "
-                                + (Thread.activeCount() - ServerManager.gI().threadMap)
-                                + " : Session " + GirlkunSessionManager.gI().getSessions().size()
-                                + "\n|7|CPU: " + cpuUsage + "/100%" + " ? " + "RAM: " + usedPhysicalMemoryStr + "/10GB"
-                                + "\n|7|Time start server: " + ServerManager.timeStart,
-                        "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "N?p", "??�ng");
+                        "|4|Người đang chơi: " + Client.gI().getPlayers().size() + "\n"
+                                + "|8|Active threads: " + activeThreads + " | Sessions: " + sessionCount + "\n"
+                                + "|7|CPU: " + cpuUsage + "% | RAM: " + usedMemoryStr + "/" + totalMemoryStr + "GB\n"
+                                + "|7|Server uptime: " + ServerManager.timeStart,
+                        "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
                 return;
 
             }
@@ -1600,12 +1616,12 @@ public class Service {
                 // Batch save với throttling
                 for (Player player : players) {
                     if (player != null) {
-                        Long lastSave = lastPlayerSave.get((int)player.id);
+                        Long lastSave = lastPlayerSave.get((int) player.id);
                         // Chỉ save nếu đã qua cooldown
                         if (lastSave == null || (currentTime - lastSave) >= PLAYER_SAVE_COOLDOWN) {
                             try {
                                 PlayerDAO.updatePlayer(player);
-                                lastPlayerSave.put((int)player.id, currentTime);
+                                lastPlayerSave.put((int) player.id, currentTime);
                             } catch (Exception e) {
                                 Logger.logException(Service.class, e, "Failed to save player: " + player.name);
                             }

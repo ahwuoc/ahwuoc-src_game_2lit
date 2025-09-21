@@ -28,6 +28,10 @@ import Dragon.models.map.blackball.BlackBallWar;
 import Dragon.models.npc.NpcManager;
 import Dragon.models.player.Player;
 import Dragon.models.matches.PVPService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import Dragon.utils.Logger;
 import Dragon.models.shop.ShopServiceNew;
 import Dragon.models.sieuhang.SieuHangService;
 import Dragon.models.skill.Skill;
@@ -881,23 +885,29 @@ public class Controller implements IMessageHandler {
                     + " �?ã Vào Game");
         }
         if (player.inventory.itemsBody.get(11).isNotNullItem()) {
-            new Thread(() -> {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
                 try {
-                    Thread.sleep(1000);
                     Service.getInstance().sendFoot(player, (short) player.inventory.itemsBody.get(11).template.id);
+                    scheduler.shutdown();
                 } catch (Exception e) {
+                    Logger.logException(Controller.class, e, "Error sending foot for player: " + (player != null ? player.name : "null"));
+                    scheduler.shutdown();
                 }
-            }).start();
+            }, 1, TimeUnit.SECONDS);
         }
         if (player.inventory.itemsBody.get(10).isNotNullItem()) {
-            new Thread(() -> {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
                 try {
-                    Thread.sleep(1000);
                     Service.gI().sendPetFollow(player,
                             (short) (player.inventory.itemsBody.get(10).template.iconID - 1));
+                    scheduler.shutdown();
                 } catch (Exception e) {
+                    Logger.logException(Controller.class, e, "Error sending pet follow for player: " + (player != null ? player.name : "null"));
+                    scheduler.shutdown();
                 }
-            }).start();
+            }, 1, TimeUnit.SECONDS);
         }
         player.SetStart = true;
         player.LastStart = System.currentTimeMillis();
