@@ -9887,14 +9887,14 @@ public class NpcFactory {
                         break;
                     case ConstNpc.MENU_BOT_CREATE: // Tạo Bot submenu
                         switch (select) {
-                            case 0: // Bot Quái (10)
-                                BotManagementService.gI().createBots(player, 10, 0);
+                            case 0: // Bot Quái
+                                Input.gI().createFormBotQuai(player);
                                 break;
-                            case 1: // Bot Shop (5)
-                                BotManagementService.gI().createBots(player, 5, 1);
+                            case 1: // Bot Shop
+                                Input.gI().createFormBotItem(player);
                                 break;
-                            case 2: // Bot Boss (1)
-                                BotManagementService.gI().createBots(player, 1, 2);
+                            case 2: // Bot Boss
+                                Input.gI().createFormBotBoss(player);
                                 break;
                         }
                         break;
