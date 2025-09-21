@@ -25,7 +25,7 @@ public class Bot extends Player {
     private short head_;
     private short body_;
     private short leg_;
-    private int type;
+    public int type;
     private int index_ = 0;
     public ShopBot shop;
     public Sanb boss;
@@ -66,8 +66,8 @@ public class Bot extends Player {
     }
     
     /**
-     * Tìm map tốt nhất có nhiều quái để bot có thể săn lùng
-     * @return mapId của map có nhiều quái nhất, -1 nếu không tìm thấy
+     * Tìm map tốt nhất có nhiều quái để bot có thể săn lùng với load balancing
+     * @return mapId của map phù hợp nhất, -1 nếu không tìm thấy
      */
     private int findBestMapWithMobs() {
         int[] huntingMaps;
@@ -81,27 +81,174 @@ public class Bot extends Player {
             huntingMaps = XayDa; // Map Xayda cho high-level
         }
         
-        int bestMapId = -1;
-        int maxMobCount = 0;
+        return findBalancedMap(huntingMaps);
+    }
+    
+    /**
+     * Tìm map cân bằng tải để tránh tập trung quá nhiều bot
+     * @param mapIds danh sách map cần kiểm tra
+     * @return mapId phù hợp nhất
+     */
+    private int findBalancedMap(int[] mapIds) {
+        // Shuffle map list để tránh bias
+        int[] shuffledMaps = mapIds.clone();
+        for (int i = shuffledMaps.length - 1; i > 0; i--) {
+            int j = RANDOM.nextInt(i + 1);
+            int temp = shuffledMaps[i];
+            shuffledMaps[i] = shuffledMaps[j];
+            shuffledMaps[j] = temp;
+        }
         
-        // Tìm map có nhiều quái sống nhất
-        for (int mapId : huntingMaps) {
-            int mobCount = countAliveMobsInMap(mapId);
-            if (mobCount > maxMobCount) {
-                maxMobCount = mobCount;
+        int bestMapId = -1;
+        double bestScore = -1;
+        
+        // Kiểm tra tất cả map và chọn map tốt nhất
+        for (int mapId : shuffledMaps) {
+            double score = calculateMapScore(mapId);
+            if (score > bestScore) {
+                bestScore = score;
                 bestMapId = mapId;
             }
         }
         
-        // Chỉ chọn map nếu có ít nhất 3 con quái
-        return maxMobCount >= 3 ? bestMapId : -1;
+        // Nếu không có map nào đủ tốt, chọn map ít đông nhất
+        if (bestScore <= 0) {
+            bestMapId = findLeastCrowdedMap(shuffledMaps);
+        }
+        
+        return bestMapId;
     }
     
     /**
-     * Đếm số lượng quái còn sống trong map
+     * Tìm map ít đông nhất khi tất cả map đều quá tải
+     * @param mapIds danh sách map cần kiểm tra
+     * @return mapId của map ít bot nhất
+     */
+    private int findLeastCrowdedMap(int[] mapIds) {
+        int leastCrowdedMap = mapIds[0];
+        int minBotCount = Integer.MAX_VALUE;
+        
+        for (int mapId : mapIds) {
+            int botCount = countBotsInMap(mapId);
+            if (botCount < minBotCount) {
+                minBotCount = botCount;
+                leastCrowdedMap = mapId;
+            }
+        }
+        
+        return leastCrowdedMap;
+    }
+    
+    /**
+     * Đếm số bot trong map
+     * @param mapId ID của map
+     * @return số lượng bot
+     */
+    private int countBotsInMap(int mapId) {
+        try {
+            Map map = MapService.gI().getMapById(mapId);
+            if (map == null || map.zones.isEmpty()) {
+                return 0;
+            }
+            
+            int totalBots = 0;
+            for (Zone zone : map.zones) {
+                if (zone.getHumanoids() != null) {
+                    for (Player p : zone.getHumanoids()) {
+                        if (p.isBot) {
+                            totalBots++;
+                        }
+                    }
+                }
+            }
+            return totalBots;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * Tính điểm cho map dựa trên số quái và mật độ bot
+     * @param mapId ID của map
+     * @return điểm từ 0-100, càng cao càng tốt
+     */
+    private double calculateMapScore(int mapId) {
+        try {
+            Map map = MapService.gI().getMapById(mapId);
+            if (map == null || map.zones.isEmpty()) {
+                return 0;
+            }
+            
+            int totalMobs = 0;
+            int totalBots = 0;
+            
+            // Đếm tổng số quái, bot và player trong tất cả zone
+            for (Zone zone : map.zones) {
+                if (zone.mobs != null) {
+                    for (Dragon.models.mob.Mob mob : zone.mobs) {
+                        if (mob.point.hp > 0 && mob.status != 0) {
+                            totalMobs++;
+                        }
+                    }
+                }
+                
+                if (zone.getHumanoids() != null) {
+                    for (Player p : zone.getHumanoids()) {
+                        if (p.isBot) {
+                            totalBots++;
+                        }
+                    }
+                }
+            }
+            
+            // Không chọn map không có quái
+            if (totalMobs < 3) {
+                return 0;
+            }
+            
+            // Tính tỷ lệ quái/bot (lý tưởng là 2-3 quái/bot)
+            double mobToBotRatio = totalBots > 0 ? (double) totalMobs / totalBots : totalMobs;
+            
+            // Điểm cơ bản dựa trên số quái
+            double mobScore = Math.min(totalMobs / 10.0, 10); // Max 10 điểm
+            
+            // Penalty nếu quá nhiều bot (overcrowding)
+            double crowdingPenalty = 0;
+            if (totalBots > totalMobs * 0.8) { // Nếu bot > 80% số quái
+                crowdingPenalty = (totalBots - totalMobs * 0.8) / totalMobs * 5;
+            }
+            
+            // Bonus nếu tỷ lệ quái/bot tốt (2-4 quái/bot)
+            double ratioBonus = 0;
+            if (mobToBotRatio >= 2 && mobToBotRatio <= 4) {
+                ratioBonus = 3;
+            } else if (mobToBotRatio >= 1.5 && mobToBotRatio <= 6) {
+                ratioBonus = 1;
+            }
+            
+            // Random factor để tránh tất cả bot chọn cùng map
+            double randomFactor = RANDOM.nextDouble() * 2; // 0-2 điểm random
+            
+            // Thêm penalty mạnh hơn cho map quá đông (cho 10000+ bot)
+            double heavyCrowdingPenalty = 0;
+            if (totalBots > 50) { // Nếu quá 50 bot trong map
+                heavyCrowdingPenalty = Math.pow(totalBots - 50, 1.5) / 10;
+            }
+            
+            double finalScore = mobScore + ratioBonus - crowdingPenalty - heavyCrowdingPenalty + randomFactor;
+            return Math.max(0, finalScore);
+            
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * Đếm số lượng quái còn sống trong map (giữ lại cho tương thích)
      * @param mapId ID của map cần kiểm tra
      * @return số lượng quái còn sống
      */
+    @SuppressWarnings("unused")
     private int countAliveMobsInMap(int mapId) {
         try {
             Map map = MapService.gI().getMapById(mapId);

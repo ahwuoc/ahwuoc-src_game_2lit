@@ -223,9 +223,11 @@ public class ConstNpc {
     public static final int CONFIRM_LEAVE_CLAN = 510;
     public static final int CONFIRM_NHUONG_PC = 511;
     public static final int MENU_ADMIN = 512;
-    public static final int BAN_PLAYER = 513;
-    public static final int BUFF_PET = 514;
-    public static final int CONFIRM_REMOVE_ALL_ITEM_LUCKY_ROUND = 515;
+    public static final int MENU_BOT_MANAGEMENT = 513;
+    public static final int MENU_BOT_STATS = 514;
+    public static final int BAN_PLAYER = 515;
+    public static final int BUFF_PET = 516;
+    public static final int CONFIRM_REMOVE_ALL_ITEM_LUCKY_ROUND = 517;
     public static final int MENU_FIND_PLAYER = 516;
     public static final int CONFIRM_DISSOLUTION_CLAN = 517;
     public static final int CONFIRM_ACTIVE = 518;
