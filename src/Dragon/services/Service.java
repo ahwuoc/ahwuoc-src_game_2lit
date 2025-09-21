@@ -1344,37 +1344,48 @@ public class Service {
             }
 
             if (text.equals("ad")) {
-                // Get accurate system metrics using modern approach
-                com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
-                        .getOperatingSystemMXBean();
-                
-                // Use Runtime for memory info instead of deprecated methods
-                Runtime runtime = Runtime.getRuntime();
-                
-                long totalMemory = runtime.maxMemory();
-                long freeMemory = runtime.freeMemory();
-                long usedMemory = runtime.totalMemory() - freeMemory;
+                try {
+                    // Use Runtime for memory info - always available
+                    Runtime runtime = Runtime.getRuntime();
+                    DecimalFormat df = new DecimalFormat("0.00");
 
-                DecimalFormat df = new DecimalFormat("0.00");
+                    long totalMemory = runtime.maxMemory();
+                    long freeMemory = runtime.freeMemory();
+                    long usedMemory = runtime.totalMemory() - freeMemory;
 
-                // CPU usage with proper validation - using process CPU load instead of deprecated system CPU load
-                double cpuLoad = osBean.getProcessCpuLoad();
-                String cpuUsage = cpuLoad >= 0 ? df.format(cpuLoad * 100) : "N/A";
+                    // Memory in GB - JVM memory usage
+                    String usedMemoryStr = df.format((double) usedMemory / (1024 * 1024 * 1024));
+                    String totalMemoryStr = df.format((double) totalMemory / (1024 * 1024 * 1024));
 
-                // Memory in GB - JVM memory usage instead of system memory
-                String usedMemoryStr = df.format((double) usedMemory / (1024 * 1024 * 1024));
-                String totalMemoryStr = df.format((double) totalMemory / (1024 * 1024 * 1024));
+                    // Thread count and session info - always available
+                    int activeThreads = Thread.activeCount();
+                    int sessionCount = GirlkunSessionManager.gI().getSessions().size();
 
-                // Thread count - use actual active threads
-                int activeThreads = Thread.activeCount();
-                int sessionCount = GirlkunSessionManager.gI().getSessions().size();
+                    // Try to get CPU info, fallback if not available
+                    String cpuUsage = "N/A";
+                    try {
+                        com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
+                                .getOperatingSystemMXBean();
+                        double cpuLoad = osBean.getProcessCpuLoad();
+                        cpuUsage = cpuLoad >= 0 ? df.format(cpuLoad * 100) : "N/A";
+                    } catch (Exception e) {
+                        cpuUsage = "Unavailable";
+                    }
 
-                NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587,
-                        "|4|Người đang chơi: " + Client.gI().getPlayers().size() + "\n"
-                                + "|8|Active threads: " + activeThreads + " | Sessions: " + sessionCount + "\n"
-                                + "|7|CPU: " + cpuUsage + "% | RAM: " + usedMemoryStr + "/" + totalMemoryStr + "GB\n"
-                                + "|7|Server uptime: " + ServerManager.timeStart,
-                        "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
+                    NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587,
+                            "|4|Người đang chơi: " + Client.gI().getPlayers().size() + "\n"
+                                    + "|8|Active threads: " + activeThreads + " | Sessions: " + sessionCount + "\n"
+                                    + "|7|CPU: " + cpuUsage + "% | RAM: " + usedMemoryStr + "/" + totalMemoryStr + "GB\n"
+                                    + "|7|Server uptime: " + ServerManager.timeStart,
+                            "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
+                } catch (Exception e) {
+                    // Fallback if all system info fails
+                    NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_ADMIN, 21587,
+                            "|4|Người đang chơi: " + Client.gI().getPlayers().size() + "\n"
+                                    + "|8|System info: Unavailable\n"
+                                    + "|7|Server uptime: " + ServerManager.timeStart,
+                            "Menu Admin", "Call Boss", "Buff Item", "GIFTCODE", "Nạp", "Đóng");
+                }
                 return;
 
             }
@@ -1442,7 +1453,6 @@ public class Service {
                     InventoryServiceNew.gI().sendItemBags(player);
                     Service.getInstance().sendThongBao(player, "??� l?y c�c m�n ?? t? kho ??!");
                 } else {
-                    // X? l� khi ??u v�o kh�ng h?p l?, v� d?: "i 1112" ho?c "i 1112 1130 1150"
                 }
             } else if (text.equals("keyz")) {// ???
                 Input.gI().createFormGiveItem(player);
