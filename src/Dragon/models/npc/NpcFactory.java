@@ -9260,7 +9260,7 @@ public class NpcFactory {
                                         + Client.gI().getPlayers().size() + "\n" + "|8|Current thread: "
                                         + (Thread.activeCount()) + "\n",
                                         "Ngọc Rồng", "Đệ Tử", "Bảo Trì", "Tìm Kiếm\nPlayer", "Chat All", "Cấp Key",
-                                        "Đóng");
+                                        "Bot Management", "Đóng");
                                 break;
                             case 1:
                                 this.createOtherMenu(player, ConstNpc.CALL_BOSS,
@@ -9278,6 +9278,9 @@ public class NpcFactory {
                                 break;
                             case 4:
                                 Input.gI().createFormNapCoin(player);
+                                break;
+                            case 6:
+                                BotManagementService.gI().showBotManagementPanel(player);
                                 break;
                         }
                         break;
@@ -9855,6 +9858,70 @@ public class NpcFactory {
                     case ConstNpc.CONFIRM_DOI_THUONG_SU_KIEN:
                         if (select == 0) {
                             ItemService.gI().openBoxVip(player);
+                        }
+                        break;
+                    case ConstNpc.MENU_BOT_MANAGEMENT:
+                        switch (select) {
+                            case 0: // Tạo Bot
+                                this.createMenuConMeo(player, ConstNpc.MENU_BOT_CREATE, 21587,
+                                        "Chọn loại bot để tạo:",
+                                        "Bot Quái (10)", "Bot Shop (5)", "Bot Boss (1)", "Đóng");
+                                break;
+                            case 1: // Xóa Bot
+                                this.createMenuConMeo(player, ConstNpc.MENU_BOT_DELETE, 21587,
+                                        "Chọn loại bot để xóa:",
+                                        "Xóa Bot Quái", "Xóa Bot Shop", "Xóa Bot Boss", "Xóa Tất Cả", "Đóng");
+                                break;
+                            case 2: // Restart Bot
+                                BotManagementService.gI().restartBots(player);
+                                break;
+                            case 3: // Thống Kê
+                                BotManagementService.gI().showBotStatistics(player);
+                                break;
+                            case 4: // Cài Đặt
+                                this.createMenuConMeo(player, ConstNpc.MENU_BOT_SETTINGS, 21587,
+                                        "Cài đặt Bot System:",
+                                        "Auto Restart", "Load Balance", "Debug Mode", "Đóng");
+                                break;
+                        }
+                        break;
+                    case ConstNpc.MENU_BOT_CREATE: // Tạo Bot submenu
+                        switch (select) {
+                            case 0: // Bot Quái (10)
+                                BotManagementService.gI().createBots(player, 10, 0);
+                                break;
+                            case 1: // Bot Shop (5)
+                                BotManagementService.gI().createBots(player, 5, 1);
+                                break;
+                            case 2: // Bot Boss (1)
+                                BotManagementService.gI().createBots(player, 1, 2);
+                                break;
+                        }
+                        break;
+                    case ConstNpc.MENU_BOT_DELETE: // Xóa Bot submenu
+                        switch (select) {
+                            case 0: // Xóa Bot Quái
+                                BotManagementService.gI().removeBots(player, 10, 0);
+                                break;
+                            case 1: // Xóa Bot Shop
+                                BotManagementService.gI().removeBots(player, 5, 1);
+                                break;
+                            case 2: // Xóa Bot Boss
+                                BotManagementService.gI().removeBots(player, 1, 2);
+                                break;
+                            case 3: // Xóa Tất Cả
+                                BotManagementService.gI().removeBots(player, 1000, -1);
+                                break;
+                        }
+                        break;
+                    case ConstNpc.MENU_BOT_STATS:
+                        switch (select) {
+                            case 0: // Refresh
+                                BotManagementService.gI().showBotStatistics(player);
+                                break;
+                            case 1: // Xuất File
+                                Service.gI().sendThongBao(player, "Chức năng xuất file đang phát triển!");
+                                break;
                         }
                         break;
                 }

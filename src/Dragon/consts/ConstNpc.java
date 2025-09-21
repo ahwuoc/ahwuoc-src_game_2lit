@@ -228,16 +228,19 @@ public class ConstNpc {
     public static final int BAN_PLAYER = 515;
     public static final int BUFF_PET = 516;
     public static final int CONFIRM_REMOVE_ALL_ITEM_LUCKY_ROUND = 517;
-    public static final int MENU_FIND_PLAYER = 516;
-    public static final int CONFIRM_DISSOLUTION_CLAN = 517;
-    public static final int CONFIRM_ACTIVE = 518;
-    public static final int menutd = 519;
-    public static final int menunm = 520;
-    public static final int menuxd = 521;
+    public static final int MENU_FIND_PLAYER = 518;
+    public static final int CONFIRM_DISSOLUTION_CLAN = 519;
+    public static final int CONFIRM_ACTIVE = 520;
+    public static final int menutd = 521;
+    public static final int menunm = 522;
+    public static final int menuxd = 523;
 
-    public static final int CONFIRM_TELE_NAMEC = 522;
-    public static final int RUT_VANG = 526;
-    public static final int UP_TOP_ITEM = 527;
+    public static final int CONFIRM_TELE_NAMEC = 524;
+    public static final int MENU_BOT_CREATE = 530;
+    public static final int MENU_BOT_DELETE = 531;
+    public static final int MENU_BOT_SETTINGS = 532;
+    public static final int RUT_VANG = 528;
+    public static final int UP_TOP_ITEM = 529;
 
     public static final int MENU_OPTION_USE_ITEM2000 = 2000;
     public static final int MENU_OPTION_USE_ITEM2001 = 2001;

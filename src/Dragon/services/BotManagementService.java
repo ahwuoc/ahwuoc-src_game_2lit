@@ -89,15 +89,21 @@ public class BotManagementService {
             for (Bot bot : allBots) {
                 // Count by type
                 switch (bot.type) {
-                    case 0: mobBots++; break;
-                    case 1: shopBots++; break;
-                    case 2: bossBots++; break;
+                    case 0:
+                        mobBots++;
+                        break;
+                    case 1:
+                        shopBots++;
+                        break;
+                    case 2:
+                        bossBots++;
+                        break;
                 }
 
                 // Count active bots (not null and in a zone)
                 if (bot.zone != null) {
                     activeBots++;
-                    
+
                     // Count bots per map
                     int mapId = bot.zone.map.mapId;
                     mapDistribution.put(mapId, mapDistribution.getOrDefault(mapId, 0) + 1);
@@ -145,8 +151,8 @@ public class BotManagementService {
      * Create new bots
      * 
      * @param player The admin player
-     * @param count Number of bots to create
-     * @param type Bot type (0=mob, 1=shop, 2=boss)
+     * @param count  Number of bots to create
+     * @param type   Bot type (0=mob, 1=shop, 2=boss)
      */
     public void createBots(Player player, int count, int type) {
         try {
@@ -156,18 +162,18 @@ public class BotManagementService {
                 short body = (short) (Math.random() * 100);
                 short leg = (short) (Math.random() * 100);
                 String name = "Bot_" + type + "_" + System.currentTimeMillis() + "_" + i;
-                
+
                 Bot bot = new Bot(head, body, leg, type, name, null, (short) 0);
                 BotManager.gI().bot.add(bot);
-                
+
                 // Initialize bot and make it join a map
                 if (type == 0) { // Mob bot
                     bot.joinMap();
                 }
             }
-            
+
             Service.gI().sendThongBao(player, "Đã tạo " + count + " bot loại " + type + " thành công!");
-            
+
         } catch (Exception e) {
             Service.gI().sendThongBao(player, "Lỗi khi tạo bot: " + e.getMessage());
             e.printStackTrace();
@@ -178,14 +184,14 @@ public class BotManagementService {
      * Remove bots by type
      * 
      * @param player The admin player
-     * @param count Number of bots to remove
-     * @param type Bot type to remove (-1 for all types)
+     * @param count  Number of bots to remove
+     * @param type   Bot type to remove (-1 for all types)
      */
     public void removeBots(Player player, int count, int type) {
         try {
             List<Bot> allBots = BotManager.gI().bot;
             int removed = 0;
-            
+
             for (int i = allBots.size() - 1; i >= 0 && removed < count; i--) {
                 Bot bot = allBots.get(i);
                 if (type == -1 || bot.type == type) {
@@ -198,9 +204,9 @@ public class BotManagementService {
                     removed++;
                 }
             }
-            
+
             Service.gI().sendThongBao(player, "Đã xóa " + removed + " bot thành công!");
-            
+
         } catch (Exception e) {
             Service.gI().sendThongBao(player, "Lỗi khi xóa bot: " + e.getMessage());
             e.printStackTrace();
@@ -216,16 +222,16 @@ public class BotManagementService {
         try {
             List<Bot> allBots = BotManager.gI().bot;
             int restarted = 0;
-            
+
             for (Bot bot : allBots) {
                 if (bot.type == 0) { // Only restart mob bots
                     bot.joinMap();
                     restarted++;
                 }
             }
-            
+
             Service.gI().sendThongBao(player, "Đã restart " + restarted + " bot thành công!");
-            
+
         } catch (Exception e) {
             Service.gI().sendThongBao(player, "Lỗi khi restart bot: " + e.getMessage());
             e.printStackTrace();
@@ -240,7 +246,7 @@ public class BotManagementService {
     public void showBotStatistics(Player player) {
         try {
             BotMetrics metrics = getBotMetrics();
-            
+
             String stats = "|7|=== THỐNG KÊ BOT CHI TIẾT ===\n"
                     + "|4|Tổng số bot: " + metrics.totalBots + "\n"
                     + "|4|Bot đang hoạt động: " + metrics.activeBots + "\n"
@@ -255,7 +261,7 @@ public class BotManagementService {
 
             NpcService.gI().createMenuConMeo(player, ConstNpc.MENU_BOT_STATS, 21587, stats,
                     "Refresh", "Xuất File", "Đóng");
-                    
+
         } catch (Exception e) {
             Service.gI().sendThongBao(player, "Lỗi khi hiển thị thống kê: " + e.getMessage());
             e.printStackTrace();
