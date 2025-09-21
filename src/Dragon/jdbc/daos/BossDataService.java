@@ -46,7 +46,6 @@ public class BossDataService {
                     loadBossOutfit(con, bossData);
                     loadBossSkills(con, bossData);
                     loadBossTexts(con, bossData);
-                    loadBossRewards(con, bossData);
                     bosses.add(bossData);
                 }
             }
@@ -86,7 +85,6 @@ public class BossDataService {
                     loadBossOutfit(con, bossData);
                     loadBossSkills(con, bossData);
                     loadBossTexts(con, bossData);
-                    loadBossRewards(con, bossData);
                     return bossData;
                 }
             }
@@ -129,9 +127,9 @@ public class BossDataService {
         TypeAppear typeAppear = TypeAppear.values()[rs.getInt("type_appear")];
 
         // Tạo BossData với constructor phù hợp
-        BossData bossData = new BossData(name, gender, new short[]{-1, -1, -1, -1, -1, -1},
-                dame, hp, mapJoin, new int[][]{}, // skillTemp sẽ được load sau
-                new String[]{}, new String[]{}, new String[]{},
+        BossData bossData = new BossData(name, gender, new short[] { -1, -1, -1, -1, -1, -1 },
+                dame, hp, mapJoin, new int[][] {}, // skillTemp sẽ được load sau
+                new String[] {}, new String[] {}, new String[] {},
                 secondsRest);
         bossData.setId(rs.getInt("id"));
         bossData.setTypeAppear(typeAppear);
@@ -231,7 +229,7 @@ public class BossDataService {
                 int skillId = rs.getInt("skill_id");
                 int skillLevel = rs.getInt("skill_level");
                 int cooldown = rs.getInt("cooldown");
-                skills.add(new int[]{skillId, skillLevel, cooldown});
+                skills.add(new int[] { skillId, skillLevel, cooldown });
             }
 
             int[][] skillArray = new int[skills.size()][];
@@ -289,14 +287,6 @@ public class BossDataService {
     }
 
     /**
-     * Load rewards cho boss
-     */
-    private void loadBossRewards(Connection con, BossData bossData) {
-        // Có thể implement logic reward ở đây hoặc tạo BossRewardService riêng
-        // Tạm thời để trống vì BossData hiện tại không có field rewards
-    }
-
-    /**
      * Parse JSON string thành double array
      */
     private double[] parseJsonToDoubleArray(String json) {
@@ -350,7 +340,7 @@ public class BossDataService {
             // Insert vào bảng bosses
             PreparedStatement ps = con.prepareStatement(
                     "INSERT INTO bosses (id, name, gender, dame, hp_json, map_join_json, "
-                    + "seconds_rest, type_appear, bosses_appear_together_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            + "seconds_rest, type_appear, bosses_appear_together_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             ps.setInt(1, bossData.getId());
             ps.setString(2, bossData.getName());
@@ -362,7 +352,7 @@ public class BossDataService {
             ps.setInt(8, bossData.getTypeAppear().ordinal());
             ps.setString(9,
                     bossData.getBossesAppearTogether() != null ? convertArrayToJson(bossData.getBossesAppearTogether())
-                    : null);
+                            : null);
 
             ps.executeUpdate();
             ps.close();

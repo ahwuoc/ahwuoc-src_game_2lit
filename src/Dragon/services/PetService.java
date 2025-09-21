@@ -8,11 +8,25 @@ import static Dragon.services.PetService.Thu_TrieuHoi;
 import Dragon.services.func.ChangeMapService;
 import Dragon.utils.SkillUtil;
 import Dragon.utils.Util;
+import Dragon.utils.Logger;
 import Dragon.De2.Thu_TrieuHoi;
 
 public class PetService {
 
     private static PetService i;
+
+    // Pet type constants for better maintainability
+    public static final byte PET_TYPE_NORMAL = 0;
+    public static final byte PET_TYPE_MABU = 1;
+    public static final byte PET_TYPE_BERUS = 2;
+    public static final byte PET_TYPE_PIC = 3;
+    public static final byte PET_TYPE_BROLY = 3;
+    public static final byte PET_TYPE_UBB = 4;
+    public static final byte PET_TYPE_XENCON = 5;
+    public static final byte PET_TYPE_ANDROID21 = 6;
+    public static final byte PET_TYPE_FU = 7;
+    public static final byte PET_TYPE_KIDBILL = 8;
+    public static final byte PET_TYPE_GOKUSSJ4 = 9;
 
     public static PetService gI() {
         if (i == null) {
@@ -22,118 +36,37 @@ public class PetService {
     }
 
     public void createAndroid21Vip(Player player, boolean isChange, byte gender) {
-        byte limitPower;
-        if (isChange) {
-            limitPower = player.pet.nPoint.limitPower;
-            if (player.fusion.typeFusion != ConstPlayer.NON_FUSION) {
-                player.pet.unFusion();
-            }
-            ChangeMapService.gI().exitMap(player.pet);
-            player.pet.dispose();
-            player.pet = null;
-        } else {
-            limitPower = 1;
-        }
-        new Thread(() -> {
-            try {
-                Pet pet = new Pet(player);
-                pet.name = "$Android 21 Majin Form";
-                pet.gender = gender;
-                pet.id = -player.id;
-                pet.nPoint.power = 1500000;
-                pet.typePet = 6;
-                pet.nPoint.stamina = 1000;
-                pet.nPoint.maxStamina = 1000;
-                pet.nPoint.hpg = 5000;
-                pet.nPoint.mpg = 5000;
-                pet.nPoint.dameg = 320;
-                pet.nPoint.defg = 250;
-                pet.nPoint.critg = 25;
-                for (int i = 0; i < 7; i++) {
-                    pet.inventory.itemsBody.add(ItemService.gI().createItemNull());
-                }
-                pet.playerSkill.skills.add(SkillUtil.createSkill(Util.nextInt(0, 2) * 2, 1));
-                for (int i = 0; i < 4; i++) {
-                    pet.playerSkill.skills.add(SkillUtil.createEmptySkill());
-                }
-                pet.nPoint.setFullHpMp();
-                player.pet = pet;
-                ;
-                player.pet.nPoint.limitPower = limitPower;
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Đệ tử vip vãi nồi đây...");
-            } catch (Exception e) {
-            }
-        }).start();
+        createVipPet(player, isChange, gender, "$Android 21 Majin Form", PET_TYPE_ANDROID21,
+                "Đệ tử vip vãi nồi đây...");
     }
 
     public void createFuVip(Player player, boolean isChange, byte gender) {
-        byte limitPower;
-        if (isChange) {
-            limitPower = player.pet.nPoint.limitPower;
-            if (player.fusion.typeFusion != ConstPlayer.NON_FUSION) {
-                player.pet.unFusion();
-            }
-            ChangeMapService.gI().exitMap(player.pet);
-            player.pet.dispose();
-            player.pet = null;
-        } else {
-            limitPower = 1;
-        }
-        new Thread(() -> {
-            try {
-                Pet pet = new Pet(player);
-                pet.name = "$Fu";
-                pet.gender = gender;
-                pet.id = -player.id;
-                pet.nPoint.power = 1500000;
-                pet.typePet = 7;
-                pet.nPoint.stamina = 1000;
-                pet.nPoint.maxStamina = 1000;
-                pet.nPoint.hpg = 5000;
-                pet.nPoint.mpg = 5000;
-                pet.nPoint.dameg = 320;
-                pet.nPoint.defg = 250;
-                pet.nPoint.critg = 25;
-                for (int i = 0; i < 7; i++) {
-                    pet.inventory.itemsBody.add(ItemService.gI().createItemNull());
-                }
-                pet.playerSkill.skills.add(SkillUtil.createSkill(Util.nextInt(0, 2) * 2, 1));
-                for (int i = 0; i < 4; i++) {
-                    pet.playerSkill.skills.add(SkillUtil.createEmptySkill());
-                }
-                pet.nPoint.setFullHpMp();
-                player.pet = pet;
-                ;
-                player.pet.nPoint.limitPower = limitPower;
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Đệ tử vip vãi nồi đây...");
-            } catch (Exception e) {
-            }
-        }).start();
+        createVipPet(player, isChange, gender, "$Fu", PET_TYPE_FU, "Đệ tử vip vãi nồi đây...");
     }
 
     public void createKidbillVip(Player player, boolean isChange, byte gender) {
-        byte limitPower;
-        if (isChange) {
-            limitPower = player.pet.nPoint.limitPower;
-            if (player.fusion.typeFusion != ConstPlayer.NON_FUSION) {
-                player.pet.unFusion();
-            }
-            ChangeMapService.gI().exitMap(player.pet);
-            player.pet.dispose();
-            player.pet = null;
-        } else {
-            limitPower = 1;
-        }
+        createVipPet(player, isChange, gender, "$Kid Bill", PET_TYPE_KIDBILL, "Đệ tử vip vãi nồi đây...");
+    }
+
+    public void createGokuSSJ4Vip(Player player, boolean isChange, byte gender) {
+        createVipPet(player, isChange, gender, "$Goku SSJ4", PET_TYPE_GOKUSSJ4, "Đệ tử vip vãi nồi đây...");
+    }
+
+    /**
+     * Common method for creating VIP pets to eliminate code duplication
+     */
+    private void createVipPet(Player player, boolean isChange, byte gender, String petName, byte petType,
+            String message) {
+        byte limitPower = preparePetChange(player, isChange);
+
         new Thread(() -> {
             try {
                 Pet pet = new Pet(player);
-                pet.name = "$Kid Bill";
+                pet.name = petName;
                 pet.gender = gender;
                 pet.id = -player.id;
                 pet.nPoint.power = 1500000;
-                pet.typePet = 8;
+                pet.typePet = petType;
                 pet.nPoint.stamina = 1000;
                 pet.nPoint.maxStamina = 1000;
                 pet.nPoint.hpg = 5000;
@@ -141,25 +74,34 @@ public class PetService {
                 pet.nPoint.dameg = 320;
                 pet.nPoint.defg = 250;
                 pet.nPoint.critg = 25;
+
+                // Initialize inventory
                 for (int i = 0; i < 7; i++) {
                     pet.inventory.itemsBody.add(ItemService.gI().createItemNull());
                 }
+
+                // Initialize skills
                 pet.playerSkill.skills.add(SkillUtil.createSkill(Util.nextInt(0, 2) * 2, 1));
                 for (int i = 0; i < 4; i++) {
                     pet.playerSkill.skills.add(SkillUtil.createEmptySkill());
                 }
+
                 pet.nPoint.setFullHpMp();
                 player.pet = pet;
-                ;
                 player.pet.nPoint.limitPower = limitPower;
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Đệ tử vip vãi nồi đây...");
+
+                Service.gI().chatJustForMe(player, player.pet, message);
             } catch (Exception e) {
+                Logger.logException(PetService.class, e,
+                        "Error creating VIP pet: " + petName + " for player: " + player.name);
             }
         }).start();
     }
 
-    public void createGokuSSJ4Vip(Player player, boolean isChange, byte gender) {
+    /**
+     * Helper method to prepare pet change - eliminates code duplication
+     */
+    private byte preparePetChange(Player player, boolean isChange) {
         byte limitPower;
         if (isChange) {
             limitPower = player.pet.nPoint.limitPower;
@@ -172,37 +114,7 @@ public class PetService {
         } else {
             limitPower = 1;
         }
-        new Thread(() -> {
-            try {
-                Pet pet = new Pet(player);
-                pet.name = "$Goku SSJ4";
-                pet.gender = gender;
-                pet.id = -player.id;
-                pet.nPoint.power = 1500000;
-                pet.typePet = 9;
-                pet.nPoint.stamina = 1000;
-                pet.nPoint.maxStamina = 1000;
-                pet.nPoint.hpg = 5000;
-                pet.nPoint.mpg = 5000;
-                pet.nPoint.dameg = 320;
-                pet.nPoint.defg = 250;
-                pet.nPoint.critg = 25;
-                for (int i = 0; i < 7; i++) {
-                    pet.inventory.itemsBody.add(ItemService.gI().createItemNull());
-                }
-                pet.playerSkill.skills.add(SkillUtil.createSkill(Util.nextInt(0, 2) * 2, 1));
-                for (int i = 0; i < 4; i++) {
-                    pet.playerSkill.skills.add(SkillUtil.createEmptySkill());
-                }
-                pet.nPoint.setFullHpMp();
-                player.pet = pet;
-                ;
-                player.pet.nPoint.limitPower = limitPower;
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Đệ tử vip vãi nồi đây...");
-            } catch (Exception e) {
-            }
-        }).start();
+        return limitPower;
     }
 
     public void createNormalPet(Player player, int gender, byte... limitPower) {
@@ -212,10 +124,9 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Xin hãy thu nhận làm đệ tử");
+                Service.gI().chatJustForMe(player, player.pet, "Xin hãy thu nhận làm đệ tử");
             } catch (Exception e) {
-
+                Logger.logException(PetService.class, e, "Error creating normal pet for player: " + player.name);
             }
         }).start();
     }
@@ -227,10 +138,9 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
-                Service.getInstance().chatJustForMe(player, player.pet, "Xin hãy thu nhận làm đệ tử");
+                Service.gI().chatJustForMe(player, player.pet, "Xin hãy thu nhận làm đệ tử");
             } catch (Exception e) {
-
+                Logger.logException(PetService.class, e, "Error creating normal pet for player: " + player.name);
             }
         }).start();
     }
@@ -242,9 +152,9 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
                 Service.gI().chatJustForMe(player, player.pet, "Oa oa oa...");
             } catch (Exception e) {
+                Logger.logException(PetService.class, e, "Error creating Mabu pet for player: " + player.name);
             }
         }).start();
     }
@@ -256,9 +166,9 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
                 Service.gI().chatJustForMe(player, player.pet, "Oa oa oa...");
             } catch (Exception e) {
+                Logger.logException(PetService.class, e, "Error creating Mabu pet for player: " + player.name);
             }
         }).start();
     }
@@ -270,7 +180,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -285,7 +195,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -300,7 +210,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -315,7 +225,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -330,7 +240,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -345,7 +255,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -360,7 +270,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -375,7 +285,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Thần hủy diệt hiện thân tất cả quỳ xuống...");
             } catch (Exception e) {
 
@@ -390,7 +300,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Sư Phụ Broly hiện thân tụi mày quỳ xuống...");
             } catch (Exception e) {
 
@@ -405,7 +315,7 @@ public class PetService {
                 if (limitPower != null && limitPower.length == 1) {
                     player.pet.nPoint.limitPower = limitPower[0];
                 }
-                Thread.sleep(1000);
+                // Removed Thread.sleep to prevent server lag
                 Service.getInstance().chatJustForMe(player, player.pet, "Sư Phụ Broly hiện thân tụi mày quỳ xuống...");
             } catch (Exception e) {
 
@@ -570,44 +480,36 @@ public class PetService {
     public void changeNamePet(Player player, String name) {
         try {
             if (!InventoryServiceNew.gI().isExistItemBag(player, 400)) {
-                Service.getInstance().sendThongBao(player, "Bạn Cần Thẻ Đặt Tên Đệ Tử, Mua Tại Bardock");
+                Service.gI().sendThongBao(player, "Bạn Cần Thẻ Đặt Tên Đệ Tử, Mua Tại Bardock");
                 return;
             } else if (Util.haveSpecialCharacter(name)) {
-                Service.getInstance().sendThongBao(player, "Tên Không Được Chứa Ký Tự Đặc Biệt");
+                Service.gI().sendThongBao(player, "Tên Không Được Chứa Ký Tự Đặc Biệt");
                 return;
             } else if (name.length() > 10) {
-                Service.getInstance().sendThongBao(player, "Tên Quá Dài");
+                Service.gI().sendThongBao(player, "Tên Quá Dài");
                 return;
             }
-            ChangeMapService.gI().exitMap(player.pet);
-            player.pet.name = "$" + name.toLowerCase().trim();
-            InventoryServiceNew.gI().subQuantityItemsBag(player, InventoryServiceNew.gI().findItemBag(player, 400), 1);
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000);
-                    Service.getInstance().chatJustForMe(player, player.pet, "Cảm Ơn Sư Phụ Đã Đặt Cho Con Tên " + name);
-                } catch (Exception e) {
-
-                }
-            }).start();
-        } catch (Exception ex) {
-
+            
+            InventoryServiceNew.gI().subQuantityItemsBag(player, ItemService.gI().createItemSetKichHoat(400, 1), 1);
+            player.pet.name = name;
+            Service.gI().Send_Caitrang(player);
+            Service.gI().sendThongBao(player, "Đổi tên đệ tử thành công");
+        } catch (Exception e) {
+            Logger.logException(PetService.class, e, "Error changing pet name for player: " + player.name);
         }
     }
 
     private int[] getDataPetNormal() {
-        long[] hpmp = {1700, 1800, 1900, 2000, 2100, 2200};
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 105) * 20; //hp
-        petData[1] = Util.nextInt(40, 105) * 20; //mp
-        petData[2] = Util.nextInt(20, 45); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 105) * 20; // hp
+        petData[1] = Util.nextInt(40, 105) * 20; // mp
+        petData[2] = Util.nextInt(20, 45); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
     private int[] getDataPetMabu() {
-        long[] hpmp = {1700, 1800, 1900, 2000, 2100, 2200};
         int[] petData = new int[5];
         petData[0] = Util.nextInt(40, 105) * 20; // hp
         petData[1] = Util.nextInt(40, 105) * 20; // mp
@@ -618,46 +520,42 @@ public class PetService {
     }
 
     private int[] getDataPetBerus() {
-        long[] hpmp = {1700, 1800, 1900, 2000, 2100, 2200};
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 110) * 20; //hp
-        petData[1] = Util.nextInt(40, 110) * 20; //mp
-        petData[2] = Util.nextInt(50, 130); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 110) * 20; // hp
+        petData[1] = Util.nextInt(40, 110) * 20; // mp
+        petData[2] = Util.nextInt(50, 130); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
     private int[] getDataPetPic() {
-        long[] hpmp = {2000, 2100, 2200, 2300, 2400, 2500};
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 125) * 20; //hp
-        petData[1] = Util.nextInt(40, 125) * 20; //mp
-        petData[2] = Util.nextInt(80, 160); //dame
-        petData[3] = Util.nextInt(10, 60); //def
-        petData[4] = Util.nextInt(2, 5); //crit
+        petData[0] = Util.nextInt(40, 125) * 20; // hp
+        petData[1] = Util.nextInt(40, 125) * 20; // mp
+        petData[2] = Util.nextInt(80, 160); // dame
+        petData[3] = Util.nextInt(10, 60); // def
+        petData[4] = Util.nextInt(2, 5); // crit
         return petData;
     }
 
     private int[] getDataXencon() {
-        long[] hpmp = {2000, 2100, 2200, 2300, 2400, 2500};
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 125) * 20; //hp
-        petData[1] = Util.nextInt(40, 125) * 20; //mp
-        petData[2] = Util.nextInt(80, 160); //dame
-        petData[3] = Util.nextInt(10, 60); //def
-        petData[4] = Util.nextInt(2, 5); //crit
+        petData[0] = Util.nextInt(40, 125) * 20; // hp
+        petData[1] = Util.nextInt(40, 125) * 20; // mp
+        petData[2] = Util.nextInt(80, 160); // dame
+        petData[3] = Util.nextInt(10, 60); // def
+        petData[4] = Util.nextInt(2, 5); // crit
         return petData;
     }
 
     private int[] getDataPetKaido() {
-        int[] hpmp = {2000, 2100, 2200, 2300, 2400, 2500};
         int[] petData = new int[5];
-        petData[0] = Util.nextInt(40, 115) * 20; //hp
-        petData[1] = Util.nextInt(40, 115) * 20; //mp
-        petData[2] = Util.nextInt(70, 140); //dame
-        petData[3] = Util.nextInt(9, 50); //def
-        petData[4] = Util.nextInt(0, 2); //crit
+        petData[0] = Util.nextInt(40, 115) * 20; // hp
+        petData[1] = Util.nextInt(40, 115) * 20; // mp
+        petData[2] = Util.nextInt(70, 140); // dame
+        petData[3] = Util.nextInt(9, 50); // def
+        petData[4] = Util.nextInt(0, 2); // crit
         return petData;
     }
 
@@ -690,7 +588,8 @@ public class PetService {
     }
 
     private void createNewPet1(Player player, boolean isBroly, boolean isUbb, boolean isXencon, byte... gender) {
-        int[] data = isBroly ? isUbb ? isXencon ? getDataPetKaido() : getDataPetPic() : getDataPetBerus() : getDataPetNormal();
+        int[] data = isBroly ? isUbb ? isXencon ? getDataPetKaido() : getDataPetPic() : getDataPetBerus()
+                : getDataPetNormal();
         Pet pet = new Pet(player);
         pet.name = "$" + (isBroly ? "Broly" : isUbb ? "Ubb" : isXencon ? "Xên Con" : "Đệ tử");
         pet.gender = (gender != null && gender.length != 0) ? gender[0] : (byte) Util.nextInt(0, 2);
@@ -761,5 +660,5 @@ public class PetService {
         pl.TrieuHoipet.nPoint.setFullHpMp();
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 }

@@ -31,7 +31,7 @@ public class NapVangService {
                     p.session.vnd -= 20;
                     InventoryServiceNew.gI().addItemBag(p, thoivang);
                     InventoryServiceNew.gI().sendItemBags(p);
-                    GirlkunDB.executeUpdate("update account set vnd = '" + p.getSession().vnd + "' where id = " + p.getSession().userId);
+                    GirlkunDB.executeUpdate("update account set vnd = ? where id = ?", p.getSession().vnd, p.getSession().userId);
                     Service.gI().sendThongBao(p, "Bạn vừa đổi thành công 200 HRZ");
 
                 }
@@ -51,7 +51,7 @@ public class NapVangService {
                     p.session.vnd -= 50;
                     InventoryServiceNew.gI().addItemBag(p, thoivang);
                     InventoryServiceNew.gI().sendItemBags(p);
-                    GirlkunDB.executeUpdate("update account set vnd = '" + p.getSession().vnd + "' where id = " + p.getSession().userId);
+                    GirlkunDB.executeUpdate("update account set vnd = ? where id = ?", p.getSession().vnd, p.getSession().userId);
                     Service.gI().sendThongBao(p, "Bạn vừa đổi thành công 500 HRZ");
 
                 }
@@ -71,7 +71,7 @@ public class NapVangService {
                     p.session.vnd -= 100;
                     InventoryServiceNew.gI().addItemBag(p, thoivang);
                     InventoryServiceNew.gI().sendItemBags(p);
-                    GirlkunDB.executeUpdate("update account set vnd = '" + p.getSession().vnd + "' where id = " + p.getSession().userId);
+                    GirlkunDB.executeUpdate("update account set vnd = ? where id = ?", p.getSession().vnd, p.getSession().userId);
                     Service.gI().sendThongBao(p, "Bạn vừa đổi thành công 1000 HRZ");
 
                 }
@@ -91,7 +91,7 @@ public class NapVangService {
                     p.session.vnd -= 500;
                     InventoryServiceNew.gI().addItemBag(p, thoivang);
                     InventoryServiceNew.gI().sendItemBags(p);
-                    GirlkunDB.executeUpdate("update account set vnd = '" + p.getSession().vnd + "' where id = " + p.getSession().userId);
+                    GirlkunDB.executeUpdate("update account set vnd = ? where id = ?", p.getSession().vnd, p.getSession().userId);
                     Service.gI().sendThongBao(p, "Bạn vừa đổi thành công 6000 HRZ");
 
                 }

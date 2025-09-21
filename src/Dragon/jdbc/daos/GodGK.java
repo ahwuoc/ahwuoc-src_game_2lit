@@ -108,12 +108,7 @@ public class GodGK {
                 Logger.log("LOGIN: userId=" + session.userId
                         + " đã online (GodGK), tiến hành kick session cũ (playerName=" + existingPlayer.name + ")");
                 existingPlayer.getSession().disconnect();
-                // Wait a bit for cleanup
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                // Removed Thread.sleep to prevent login lag
             }
 
             // Try to load player data

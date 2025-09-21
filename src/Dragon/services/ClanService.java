@@ -1023,7 +1023,7 @@ public class ClanService {
                 ps.addBatch();
             }
             ps.executeBatch();
-            Thread.sleep(30000);
+            // Removed 30-second Thread.sleep to prevent severe server lag
         } catch (Exception e) {
 
             Logger.logException(Clan.class, e, "Có lỗi khi update clan vào db");

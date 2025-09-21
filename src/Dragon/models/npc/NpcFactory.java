@@ -1,5 +1,9 @@
 package Dragon.models.npc;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 import Dragon.De2.Thu_TrieuHoi;
 import Dragon.MaQuaTang.MaQuaTangManager;
 import Dragon.kygui.ShopKyGuiService;
@@ -692,29 +696,30 @@ public class NpcFactory {
                                     } else if (khucMia == null) {
                                         this.npcChat(player, "Bạn không có khúc mía nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 60;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: "
-                                                            + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
-                                                }
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {60};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            timeWait[0]--;
+                                            if (timeWait[0] > 0) {
+                                                this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: "
+                                                        + timeWait[0] + ".");
+                                            } else {
+                                                scheduler.shutdown();
+                                                // Complete the sugarcane juice making process
+                                                Item nuocMia = ItemService.gI().createNewItem((short) 1642);
+                                                cucDa.quantity -= 100;
+                                                khucMia.quantity -= 50;
+                                                player.inventory.gold -= 500_000_000;
+                                                Service.gI().sendMoney(player);
+                                                InventoryServiceNew.gI().addItemBag(player, nuocMia);
+                                                InventoryServiceNew.gI().sendItemBags(player);
+                                                this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                        "Đã xay nước mía xong\n|7|Bạn đã nhận được "
+                                                        + nuocMia.template.name,
+                                                        "Nhận Ngay");
                                             }
-                                            Item nuocMia = ItemService.gI().createNewItem((short) 1642);
-                                            cucDa.quantity -= 100;
-                                            khucMia.quantity -= 50;
-                                            player.inventory.gold -= 500_000_000;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, nuocMia);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã xay nước mía xong\n|7|Bạn đã nhận được "
-                                                    + nuocMia.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                                 case 1:
@@ -730,29 +735,29 @@ public class NpcFactory {
                                     } else if (khucMia == null) {
                                         this.npcChat(player, "Bạn không có khúc mía nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 160;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: "
-                                                            + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
-                                                }
+                                        // Use ScheduledExecutorService for 160-second countdown
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {160};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            timeWait[0]--;
+                                            if (timeWait[0] > 0) {
+                                                this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: "
+                                                        + timeWait[0] + ".");
+                                            } else {
+                                                scheduler.shutdown();
+                                                Item nuocMia = ItemService.gI().createNewItem((short) 1643);
+                                                cucDa.quantity -= 200;
+                                                khucMia.quantity -= 70;
+                                                player.inventory.gold -= 500_000_000;
+                                                Service.gI().sendMoney(player);
+                                                InventoryServiceNew.gI().addItemBag(player, nuocMia);
+                                                InventoryServiceNew.gI().sendItemBags(player);
+                                                this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                        "Đã xay nước mía xong\n|7|Bạn đã nhận được "
+                                                        + nuocMia.template.name,
+                                                        "Nhận Ngay");
                                             }
-                                            Item nuocMia = ItemService.gI().createNewItem((short) 1643);
-                                            cucDa.quantity -= 200;
-                                            khucMia.quantity -= 70;
-                                            player.inventory.gold -= 500_000_000;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, nuocMia);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã xay nước mía xong\n|7|Bạn đã nhận được "
-                                                    + nuocMia.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                                 case 2:
@@ -768,29 +773,33 @@ public class NpcFactory {
                                     } else if (khucMia == null) {
                                         this.npcChat(player, "Bạn không có khúc mía nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 300;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: "
-                                                            + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {300};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            try {
+                                                timeWait[0]--;
+                                                if (timeWait[0] > 0) {
+                                                    this.npcChat(player, "Đang xay nước mía\n|7|Thời gian còn lại: " + timeWait[0] + ".");
+                                                } else {
+                                                    scheduler.shutdown();
+                                                    // Complete the sugarcane juice making process
+                                                    Item nuocMia = ItemService.gI().createNewItem((short) 1644);
+                                                    cucDa.quantity -= 300;
+                                                    khucMia.quantity -= 100;
+                                                    player.inventory.gold -= 500_000_000;
+                                                    Service.gI().sendMoney(player);
+                                                    InventoryServiceNew.gI().addItemBag(player, nuocMia);
+                                                    InventoryServiceNew.gI().sendItemBags(player);
+                                                    this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                            "Đã xay nước mía xong\n|7|Bạn đã nhận được "
+                                                            + nuocMia.template.name,
+                                                            "Nhận Ngay");
                                                 }
+                                            } catch (Exception e) {
+                                                Logger.logException(NpcFactory.class, e, "Error in sugarcane juice countdown");
                                             }
-                                            Item nuocMia = ItemService.gI().createNewItem((short) 1644);
-                                            cucDa.quantity -= 300;
-                                            khucMia.quantity -= 100;
-                                            player.inventory.gold -= 500_000_000;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, nuocMia);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã xay nước mía xong\n|7|Bạn đã nhận được "
-                                                    + nuocMia.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                             }
@@ -2445,35 +2454,39 @@ public class NpcFactory {
                                     } else if (caRot == null) {
                                         this.npcChat(player, "Bạn không có Cà Rốt nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 30;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player,
-                                                            "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {30};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            try {
+                                                timeWait[0]--;
+                                                if (timeWait[0] > 0) {
+                                                    this.npcChat(player, "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait[0] + ".");
+                                                } else {
+                                                    scheduler.shutdown();
+                                                    // Complete the cake making process
+                                                    Item banhGaQuay = ItemService.gI().createNewItem((short) 465);
+                                                    botMi.quantity -= 99;
+                                                    dauXanh.quantity -= 50;
+                                                    gaQuay.quantity -= 10;
+                                                    thoTrang.quantity -= 99;
+                                                    thoXanh.quantity -= 99;
+                                                    thoHong.quantity -= 99;
+                                                    caRot.quantity -= 99;
+                                                    player.inventory.gold -= 1_000_000_000;
+                                                    player.point_vnd += 2;
+                                                    Service.gI().sendMoney(player);
+                                                    InventoryServiceNew.gI().addItemBag(player, banhGaQuay);
+                                                    InventoryServiceNew.gI().sendItemBags(player);
+                                                    this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                            "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
+                                                            + banhGaQuay.template.name,
+                                                            "Nhận Ngay");
                                                 }
+                                            } catch (Exception e) {
+                                                Logger.logException(NpcFactory.class, e, "Error in cake making countdown");
                                             }
-                                            Item banhGaQuay = ItemService.gI().createNewItem((short) 465);
-                                            botMi.quantity -= 99;
-                                            dauXanh.quantity -= 50;
-                                            gaQuay.quantity -= 10;
-                                            thoTrang.quantity -= 99;
-                                            thoXanh.quantity -= 99;
-                                            thoHong.quantity -= 99;
-                                            caRot.quantity -= 99;
-                                            player.inventory.gold -= 1_000_000_000;
-                                            player.point_vnd += 2;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, banhGaQuay);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
-                                                    + banhGaQuay.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                                 case 1:
@@ -2518,35 +2531,39 @@ public class NpcFactory {
                                     } else if (caRot == null) {
                                         this.npcChat(player, "Bạn không có Cà Rốt nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 40;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player,
-                                                            "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {40};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            try {
+                                                timeWait[0]--;
+                                                if (timeWait[0] > 0) {
+                                                    this.npcChat(player, "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait[0] + ".");
+                                                } else {
+                                                    scheduler.shutdown();
+                                                    // Complete the cake making process
+                                                    Item banhVitMuoi1Trung = ItemService.gI().createNewItem((short) 465);
+                                                    botMi.quantity -= 99;
+                                                    dauXanh.quantity -= 50;
+                                                    trungVit.quantity -= 10;
+                                                    thoTrang.quantity -= 99;
+                                                    thoXanh.quantity -= 99;
+                                                    thoHong.quantity -= 99;
+                                                    caRot.quantity -= 99;
+                                                    player.inventory.gold -= 1_000_000_000;
+                                                    player.point_vnd += 2;
+                                                    Service.gI().sendMoney(player);
+                                                    InventoryServiceNew.gI().addItemBag(player, banhVitMuoi1Trung);
+                                                    InventoryServiceNew.gI().sendItemBags(player);
+                                                    this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                            "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
+                                                            + banhVitMuoi1Trung.template.name,
+                                                            "Nhận Ngay");
                                                 }
+                                            } catch (Exception e) {
+                                                Logger.logException(NpcFactory.class, e, "Error in cake making countdown");
                                             }
-                                            Item banhVitMuoi1Trung = ItemService.gI().createNewItem((short) 465);
-                                            botMi.quantity -= 99;
-                                            dauXanh.quantity -= 50;
-                                            trungVit.quantity -= 10;
-                                            thoTrang.quantity -= 99;
-                                            thoXanh.quantity -= 99;
-                                            thoHong.quantity -= 99;
-                                            caRot.quantity -= 99;
-                                            player.inventory.gold -= 1_000_000_000;
-                                            player.point_vnd += 2;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, banhVitMuoi1Trung);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
-                                                    + banhVitMuoi1Trung.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                                 case 2:
@@ -2591,17 +2608,17 @@ public class NpcFactory {
                                     } else if (caRot == null) {
                                         this.npcChat(player, "Bạn không có Cà Rốt nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 50;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player,
-                                                            "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
-                                                }
-                                            }
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {50};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            try {
+                                                timeWait[0]--;
+                                                if (timeWait[0] > 0) {
+                                                    this.npcChat(player, "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait[0] + ".");
+                                                } else {
+                                                    scheduler.shutdown();
+                                                    // Complete the cake making process
                                             Item banhVitMuoi2Trung = ItemService.gI().createNewItem((short) 466);
                                             botMi.quantity -= 99;
                                             dauXanh.quantity -= 50;
@@ -2615,11 +2632,15 @@ public class NpcFactory {
                                             Service.gI().sendMoney(player);
                                             InventoryServiceNew.gI().addItemBag(player, banhVitMuoi2Trung);
                                             InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
-                                                    + banhVitMuoi2Trung.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                                    this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                            "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
+                                                            + banhVitMuoi2Trung.template.name,
+                                                            "Nhận Ngay");
+                                                }
+                                            } catch (Exception e) {
+                                                Logger.logException(NpcFactory.class, e, "Error in cake making countdown");
+                                            }
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
                                 case 3:
@@ -2669,36 +2690,40 @@ public class NpcFactory {
                                     } else if (caRot == null) {
                                         this.npcChat(player, "Bạn không có Cà Rốt nào.");
                                     } else {
-                                        new Thread(() -> {
-                                            int timeWait = 60;
-                                            while (timeWait > 0) {
-                                                try {
-                                                    timeWait--;
-                                                    this.npcChat(player,
-                                                            "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait + ".");
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ex) {
+                                        // Use ScheduledExecutorService instead of blocking Thread.sleep
+                                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                                        final int[] timeWait = {60};
+                                        scheduler.scheduleAtFixedRate(() -> {
+                                            try {
+                                                timeWait[0]--;
+                                                if (timeWait[0] > 0) {
+                                                    this.npcChat(player, "Đang làm bánh\n|7|Thời gian còn lại: " + timeWait[0] + ".");
+                                                } else {
+                                                    scheduler.shutdown();
+                                                    // Complete the cake making process
+                                                    Item banhThapCam = ItemService.gI().createNewItem((short) 891);
+                                                    botMi.quantity -= 299;
+                                                    dauXanh.quantity -= 99;
+                                                    gaQuay.quantity -= 30;
+                                                    trungVit.quantity -= 30;
+                                                    thoTrang.quantity -= 99;
+                                                    thoXanh.quantity -= 99;
+                                                    thoHong.quantity -= 99;
+                                                    caRot.quantity -= 99;
+                                                    player.inventory.gold -= 1_000_000_000;
+                                                    player.point_vnd += 5;
+                                                    Service.gI().sendMoney(player);
+                                                    InventoryServiceNew.gI().addItemBag(player, banhThapCam);
+                                                    InventoryServiceNew.gI().sendItemBags(player);
+                                                    this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
+                                                            "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
+                                                            + banhThapCam.template.name,
+                                                            "Nhận Ngay");
                                                 }
+                                            } catch (Exception e) {
+                                                Logger.logException(NpcFactory.class, e, "Error in cake making countdown");
                                             }
-                                            Item banhThapCam = ItemService.gI().createNewItem((short) 891);
-                                            botMi.quantity -= 299;
-                                            dauXanh.quantity -= 99;
-                                            gaQuay.quantity -= 30;
-                                            trungVit.quantity -= 30;
-                                            thoTrang.quantity -= 99;
-                                            thoXanh.quantity -= 99;
-                                            thoHong.quantity -= 99;
-                                            caRot.quantity -= 99;
-                                            player.inventory.gold -= 1_000_000_000;
-                                            player.point_vnd += 5;
-                                            Service.gI().sendMoney(player);
-                                            InventoryServiceNew.gI().addItemBag(player, banhThapCam);
-                                            InventoryServiceNew.gI().sendItemBags(player);
-                                            this.createOtherMenu(player, ConstNpc.IGNORE_MENU,
-                                                    "Đã làm bánh xong xong\n|7|Bạn đã nhận được "
-                                                    + banhThapCam.template.name,
-                                                    "Nhận Ngay");
-                                        }).start();
+                                        }, 0, 1, TimeUnit.SECONDS);
                                     }
                                     break;
 
@@ -7153,7 +7178,7 @@ public class NpcFactory {
                                                         "Gắp X1", "Gắp X10", "Gắp X100", "Rương Đồ");
                                                 break;
                                             }
-                                            Thread.sleep(100);
+                                            // Remove blocking Thread.sleep - gacha processing should be immediate
                                             short[] bktt = {1351, 1352, 1353, 1354, 1355, 1356, 1357, 1358, 1359, 1360,
                                                 1608, 1609, 1610, 1561, 1397, 1236, 1237, 1471, 1480, 1561, 1608,
                                                 1609, 1610, 1995};
@@ -7247,7 +7272,7 @@ public class NpcFactory {
                                                         "Gắp X1", "Gắp X10", "Gắp X100", "Rương Đồ");
                                                 break;
                                             }
-                                            Thread.sleep(100);
+                                            // Remove blocking Thread.sleep - gacha processing should be immediate
                                             short[] bkttt = {1351, 1352, 1353, 1354, 1355, 1356, 1357, 1358, 1359,
                                                 1360, 1608, 1609, 1610, 1561, 1397, 1236, 1237, 1471, 1480, 1561,
                                                 1608, 1609, 1610, 1995};

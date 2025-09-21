@@ -4,6 +4,10 @@ import com.girlkun.database.GirlkunDB;
 
 import java.net.ServerSocket;
 import java.awt.GraphicsEnvironment;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 
 import Dragon.Bot.BotManager;
 import Dragon.jdbc.daos.HistoryTransactionDAO;
@@ -117,48 +121,51 @@ public class ServerManager {
         Logger.log(Logger.YELLOW, "TIME STARTING THE SERVER: " + ServerManager.timeStart + "\n");
         // Logger.log(Logger.GREEN, "BY NROEVEIL");
 
-        new Thread(() -> {
-            while (true) {
-                try {
-                    SieuHangManager.gI().update();
-                    Thread.sleep(50);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        // Use ScheduledExecutorService instead of Thread.sleep for better performance
+        ScheduledExecutorService sieuHangScheduler = Executors.newSingleThreadScheduledExecutor();
+        sieuHangScheduler.scheduleAtFixedRate(() -> {
+            try {
+                SieuHangManager.gI().update();
+            } catch (Exception e) {
+                Logger.logException(ServerManager.class, e, "SieuHangManager update failed");
             }
-        }).start();
+        }, 0, 100, TimeUnit.MILLISECONDS); // Reduced from 50ms to 100ms
         new Thread(BotManager.gI(), "Thread Bot Game").start();
         new Thread(TaiXiu.gI(), "Thread TaiXiu").start();
         isRunning = true;
-        new Thread(() -> {
-            while (isRunning) {
-                try {
-                    long start = System.currentTimeMillis();
-                    MartialCongressManager.gI().update();
-                    Dungeon_Manager.gI().globalUpdate(); // Removed duplicate call
-                    VoDaiManager.gI().update();
-                    // Removed unused player loop that was causing unnecessary iteration
-                    ShopKyGuiManager.gI().save();
-                    long timeUpdate = System.currentTimeMillis() - start;
-                    // Increased delay from 500ms to 2000ms to reduce CPU load
-                    long targetDelay = 2000;
-                    if (timeUpdate < targetDelay) {
-                        Thread.sleep(targetDelay - timeUpdate);
+        // Use ScheduledExecutorService for tournament updates
+        ScheduledExecutorService tournamentScheduler = Executors.newSingleThreadScheduledExecutor();
+        tournamentScheduler.scheduleAtFixedRate(() -> {
+            if (!isRunning) return;
+            try {
+                MartialCongressManager.gI().update();
+                Dungeon_Manager.gI().globalUpdate();
+                VoDaiManager.gI().update();
+                
+                // Move save operations to separate async task to prevent blocking
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        ShopKyGuiManager.gI().save();
+                    } catch (Exception e) {
+                        Logger.logException(ServerManager.class, e, "Shop save failed");
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                });
+            } catch (Exception e) {
+                Logger.logException(ServerManager.class, e, "Tournament update failed");
             }
-        }, "Update dai hoi vo thuat").start();
-        try {
-            Thread.sleep(1000);
-            RefactoredBossManager.getInstance().loadBosses();
-            Manager.MAPS.forEach(Dragon.models.map.Map::initBoss);
-        } catch (InterruptedException ex) {
-            System.err.print("\nError at 311\n");
-            java.util.logging.Logger.getLogger(BossManager.class.getName()).log(Level.SEVERE, null, ex);
-
-        }
+        }, 0, 3000, TimeUnit.MILLISECONDS); // Increased to 3 seconds for better performance
+        // Use async initialization instead of blocking sleep
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Small delay for initialization order
+                TimeUnit.MILLISECONDS.sleep(500);
+                RefactoredBossManager.getInstance().loadBosses();
+                Manager.MAPS.forEach(Dragon.models.map.Map::initBoss);
+                Logger.log("Boss initialization completed");
+            } catch (Exception ex) {
+                Logger.logException(ServerManager.class, ex, "Boss initialization failed");
+            }
+        });
     }
 
     private void act() throws Exception {
@@ -244,12 +251,8 @@ public class ServerManager {
             Scanner sc = new Scanner(System.in);
             while (true) {
                 if (!sc.hasNextLine()) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
+                    // Use yield instead of sleep for better CPU efficiency
+                    Thread.yield();
                     continue;
                 }
                 String line = sc.nextLine();
@@ -431,7 +434,6 @@ public class ServerManager {
                         }
                     });
 
-                    // AutoSavePlayerData is already async now
                     Service.gI().AutoSavePlayerData();
 
                     java.util.concurrent.CompletableFuture.runAsync(() -> {
@@ -442,7 +444,8 @@ public class ServerManager {
                         }
                     });
 
-                    Thread.sleep(delay);
+                    // Use TimeUnit for better readability and precision
+                    TimeUnit.MILLISECONDS.sleep(delay);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

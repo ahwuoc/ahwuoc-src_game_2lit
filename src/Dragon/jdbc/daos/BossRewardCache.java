@@ -32,12 +32,8 @@ public class BossRewardCache {
         return instance;
     }
 
-    /**
-     * Initialize cache - Load tất cả boss rewards từ database vào memory
-     */
     public void initializeCache() {
         try {
-            // Initialize cache silently
             loadAllBossRewards();
             loadAllBossRewardOptions();
 
@@ -49,6 +45,7 @@ public class BossRewardCache {
             Logger.log("BossRewardCache: Failed to initialize cache!");
         }
     }
+
     /**
      * Load tất cả boss rewards từ database
      */

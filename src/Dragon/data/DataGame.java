@@ -55,10 +55,10 @@ public class DataGame {
             msg.writer().writeByte(vsItem);
             msg.writer().writeByte(0);
             // Phước Level theo sức mạnh hiện có
-            double[] smtieuchuan = {100000D, 950000D, 1625000D, 5562500D, 6906200D, 19765600D, 244140000D, 610350000D,
-                1525875000D, 3814688000D, 9536719000D, 23841797000D, 59604492000D, 149011230000D, 372528075000D,
-                931320188000D, 2328300470000D, 5820751175000D, 14551877937000D, 36379694842000D, 90949237105000D,
-                227373092762000D, 427373092762000D, 647373092762000D, 8473730927000000062L};
+            double[] smtieuchuan = { 100000D, 950000D, 1625000D, 5562500D, 6906200D, 19765600D, 244140000D, 610350000D,
+                    1525875000D, 3814688000D, 9536719000D, 23841797000D, 59604492000D, 149011230000D, 372528075000D,
+                    931320188000D, 2328300470000D, 5820751175000D, 14551877937000D, 36379694842000D, 90949237105000D,
+                    227373092762000D, 427373092762000D, 647373092762000D, 8473730927000000062L };
             msg.writer().writeByte(smtieuchuan.length);
             for (double l : smtieuchuan) {
                 msg.writer().writeDouble(l);
@@ -409,7 +409,6 @@ public class DataGame {
     public static void sendIcon(MySession session, int id) {
         Message msg = null;
         try {
-            // Sử dụng IconResizer để lấy icon từ folder x4 và resize theo zoomLevel
             byte[] icon = IconResizer.getIcon(id, session.zoomLevel);
             if (icon != null) {
                 msg = new Message(-67);
